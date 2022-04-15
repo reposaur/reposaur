@@ -1,0 +1,4 @@
+# Used for local tests only
+/config.yaml
+/policy/
+/testdata/events/_*.json
