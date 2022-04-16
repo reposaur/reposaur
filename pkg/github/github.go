@@ -14,11 +14,21 @@ import (
 
 const GITHUB_HOST = "api.github.com"
 
+// Client is a basic implementation of an http.Client
+// tailored to use with GitHub's API.
 type Client struct {
 	httpClient *http.Client
 	baseURL    *url.URL
 }
 
+// NewClient creates a new Client.
+//
+// If httpClient is nil and a token is present in either
+// GITHUB_TOKEN or GH_TOKEN environment variables an authenticated
+// client will be created, otherwise the default http.Client is used.
+//
+// The API hostname can be configured using the GITHUB_HOST or GH_HOST
+// environment variables. Defaults to api.github.com.
 func NewClient(httpClient *http.Client) *Client {
 	if httpClient == nil {
 		token := getEnvVar("", "GITHUB_TOKEN", "GH_TOKEN")
