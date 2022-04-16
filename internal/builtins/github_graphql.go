@@ -1,6 +1,7 @@
 package builtins
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/open-policy-agent/opa/ast"
@@ -46,6 +47,10 @@ func GitHubGraphQLBuiltinImpl(client *github.Client) func(bctx rego.BuiltinConte
 		resp, err := client.Do(req)
 		if err != nil {
 			finalResp.Error = err.Error()
+		}
+		dec := json.NewDecoder(resp.Body)
+		if err := dec.Decode(&finalResp.Body); err != nil {
+			return nil, err
 		}
 
 		finalResp.StatusCode = resp.StatusCode

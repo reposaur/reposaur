@@ -86,6 +86,12 @@ func GitHubRequestBuiltinImpl(client *github.Client) func(bctx rego.BuiltinConte
 		if err != nil {
 			finalResp.Error = err.Error()
 		}
+		defer resp.Body.Close()
+
+		dec := json.NewDecoder(resp.Body)
+		if err := dec.Decode(&finalResp.Body); err != nil {
+			return nil, err
+		}
 
 		finalResp.StatusCode = resp.StatusCode
 
