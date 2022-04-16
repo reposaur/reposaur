@@ -36,7 +36,6 @@ func DetectNamespace(data interface{}) (string, error) {
 		for _, k := range keys {
 			for _, dk := range val.MapKeys() {
 				if k == dk.String() {
-					fmt.Println(n, "yes")
 					matches++
 				}
 			}
