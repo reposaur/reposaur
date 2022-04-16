@@ -4,10 +4,18 @@
 
 > Audit your GitHub data using custom policies written in [Rego][rego].
 
+Reposaur allows users and organizations to execute policies against GitHub data to
+generate reports, perform auditing and more. The end-goal is to make it easy to
+perform such tasks in an automated way, enabling people to focus their time in solving
+any issues instead of looking for them.
+
+This is better explained with the example in [this Gist](https://gist.github.com/crqra/7ad034958dc02b141415241b321400d1), that executes a policy against
+every repository in an organization.
+
 ## Features
 
-* Write custom policies using OPA Rego language
-* Simple and easy-to-use CLI
+* Write custom policies using [Rego][rego] policy language
+* Simple, composable and easy-to-use CLI
 * Extendable using the Go SDK
 * Output reports in JSON and SARIF formats
 * (TODO) Deploy as a GitHub App or use in GitHub Actions
@@ -16,12 +24,6 @@
 
 ```shell
 $ go install github.com/reposaur/reposaur
-```
-
-Or
-
-```go
-import "github.com/reposaur/reposaur/pkg/sdk"
 ```
 
 ## Guides
@@ -59,72 +61,25 @@ $ gh api /repos/reposaur/reposaur | reposaur
 $ gh api /repos/reposaur/reposaur | reposaur | gzip | base64
 ```
 
-## Go SDK
-
-### Simple usage
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-
-	"github.com/reposaur/reposaur/pkg/sdk"
-)
-
-var data = map[string]interface{}{
-	"repository":   map[string]interface{}{},
-	"pull_request": map[string]interface{}{},
-}
-
-func main() {
-	ctx := context.Background()
-
-	rs, err := sdk.New(ctx, []string{"./policy"})
-	if err != nil {
-		panic(err)
-	}
-
-	report, err := rs.Check(ctx, data)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(report)
-}
-```
-
 ## Policies
 
-The policies used by Reposaur use the [Rego][rego] language. There are some outstanding
-particularities related with the policies' namespaces, rules, metadata and built-in functions.
+Policies are written in [Rego][rego]. There are some particularities that
+Reposaur takes into consideration, detailed below.
 
 ### Namespaces
 
 Reposaur can execute multiple policies against different kinds of data. To distinguish
 which policies should be executed against a particular set of data we use namespaces.
 
-For example, if you've a policy like following:
+A namespace is defined using the `package` keyword:
 
 ```rego
+# This policy has the "repository" namespace
 package repository
-
-violation_empty_description {
-  not input.description
-}
 ```
 
-and execute the command (notice we're requesting a Pull Request):
-
-```
-gh api /repos/reposaur/reposaur/pulls/1 | reposaur
-```
-
-the generated report would be empty since there's no policy with the `pull_request` namespace.
-
-By default, the CLI attempts to detect the namespace of some data based on it's properties. If
-it's failing to detect a valid namespace, you can always specify it manually using the `--namespace <NAMESPACE>` flag.
+By default, the CLI attempts to detect the namespace based on the data. If
+it's failing to detect a valid namespace, you can specify it manually using the `--namespace <NAMESPACE>` flag.
 
 ## Rules
 
