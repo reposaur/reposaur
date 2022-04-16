@@ -24,6 +24,10 @@ Or
 import "github.com/reposaur/reposaur/pkg/sdk"
 ```
 
+## Guides
+
+- [Writing & testing your first policy](https://github.com/orgs/reposaur/discussions/1)
+
 ## Usage
 
 ```bash
