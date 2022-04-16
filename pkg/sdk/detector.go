@@ -19,7 +19,7 @@ var namespaceToKeysMap = map[string][]string{
 
 // DetectNamespace will attempt to detect some data's
 // namespace based on it's keys.
-// 
+//
 // Returns an error of type ErrUnknownNamespace if data
 // is not a map or if it can't detect a valid namespace.
 func DetectNamespace(data interface{}) (string, error) {
