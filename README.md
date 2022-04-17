@@ -25,6 +25,12 @@ every repository in an organization.
 ## Installation
 
 ```shell
+$ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh | bash
+```
+
+### Using Go
+
+```shell
 $ go install github.com/reposaur/reposaur
 ```
 
