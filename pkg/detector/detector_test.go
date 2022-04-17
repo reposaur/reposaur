@@ -1,9 +1,9 @@
-package sdk_test
+package detector_test
 
 import (
 	"testing"
 
-	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/reposaur/reposaur/pkg/detector"
 )
 
 func TestDetectIssueNamespace(t *testing.T) {
@@ -12,7 +12,7 @@ func TestDetectIssueNamespace(t *testing.T) {
 		"closed_by": "some",
 	}
 
-	ns, err := sdk.DetectNamespace(data)
+	ns, err := detector.DetectNamespace(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestDetectOrganizationNamespace(t *testing.T) {
 		"members_url": "https://github.com",
 	}
 
-	ns, err := sdk.DetectNamespace(data)
+	ns, err := detector.DetectNamespace(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestDetectPullRequestNamespace(t *testing.T) {
 		"head": "some",
 	}
 
-	ns, err := sdk.DetectNamespace(data)
+	ns, err := detector.DetectNamespace(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestDetectRepositoryNamespace(t *testing.T) {
 		"full_name": "reposaur/test",
 	}
 
-	ns, err := sdk.DetectNamespace(data)
+	ns, err := detector.DetectNamespace(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestDetectUserNamespace(t *testing.T) {
 		"hireable": true,
 	}
 
-	ns, err := sdk.DetectNamespace(data)
+	ns, err := detector.DetectNamespace(data)
 	if err != nil {
 		t.Fatal(err)
 	}

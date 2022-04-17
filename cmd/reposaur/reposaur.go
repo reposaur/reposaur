@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
 	"github.com/spf13/cobra"
@@ -43,17 +44,13 @@ func NewCommand() *cobra.Command {
 		namespace := params.namespace
 
 		if namespace == "" {
-			namespace, err = sdk.DetectNamespace(input)
+			namespace, err = detector.DetectNamespace(input)
 			if err != nil {
 				return err
 			}
 		}
 
-		data := map[string]interface{}{
-			namespace: input,
-		}
-
-		report, err := rs.Check(cmd.Context(), data)
+		report, err := rs.Check(cmd.Context(), namespace, input)
 		if err != nil {
 			return err
 		}

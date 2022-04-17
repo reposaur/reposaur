@@ -1,6 +1,7 @@
 package builtins
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/pkg/github"
 )
 
 var GitHubRequestBuiltin = rego.Function{
@@ -27,7 +27,7 @@ var GitHubRequestBuiltin = rego.Function{
 	Memoize: true,
 }
 
-func GitHubRequestBuiltinImpl(client *github.Client) func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
+func GitHubRequestBuiltinImpl(client *http.Client) func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
 	return func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
 		var unparsedReq string
 		var data map[string]interface{}
@@ -76,10 +76,20 @@ func GitHubRequestBuiltinImpl(client *github.Client) func(bctx rego.BuiltinConte
 
 		u.RawQuery = qs.Encode()
 
-		req, err := client.NewRequest(method, u.String(), data)
+		buf := &bytes.Buffer{}
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(data); err != nil {
+			return nil, err
+		}
+
+		req, err := http.NewRequest(method, u.String(), buf)
 		if err != nil {
 			return nil, err
 		}
+
+		req.Header.Set("User-Agent", "reposaur")
+		req.Header.Set("Content-Type", "application/json")
 
 		finalResp := GitHubResponse{}
 		resp, err := client.Do(req)

@@ -2,11 +2,12 @@ package sdk
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/reposaur/reposaur/internal/builtins"
 	"github.com/reposaur/reposaur/internal/policy"
-	"github.com/reposaur/reposaur/pkg/github"
 	"github.com/reposaur/reposaur/pkg/output"
+	"github.com/reposaur/reposaur/pkg/util"
 	"github.com/rs/zerolog"
 )
 
@@ -18,12 +19,29 @@ type Option func(*Reposaur)
 // started with several options that control configuration, logging and
 // the client to GitHub.
 type Reposaur struct {
-	logger zerolog.Logger
-	client *github.Client
-	engine *policy.Engine
+	logger     zerolog.Logger
+	engine     *policy.Engine
+	httpClient *http.Client
 }
 
-// New returns a new Reposaur instance.
+// New returns a new Reposaur instance, loading and
+// compiling any policies provided and registering
+// the built-in functions.
+//
+// If an HTTP client isn't passed as an option, a default
+// client is created. The default client will be authenticated
+// if Reposaur can find the relevant information in environment
+// variables, namely (in this order of preference):
+//
+//   * A client with a token if:
+//     * `GITHUB_TOKEN` or `GH_TOKEN` is present
+//   * A client authenticated as an installation if all the following are present:
+//     * `GITHUB_APP_ID` or `GH_APP_ID`
+//     * `GITHUB_INSTALLATION_ID` or `GH_INSTALLATION_ID`
+//     * `GITHUB_APP_PRIVAATE_KEY` or `GH_APP_PRIVATE_KEY` (Base64 encoded)
+//
+// The default HTTP client will use the default host `api.github.com`. Can
+// be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
 func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, error) {
 	sdk := &Reposaur{
 		logger: zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Logger(),
@@ -33,11 +51,16 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 		opt(sdk)
 	}
 
-	if sdk.client == nil {
-		sdk.client = github.NewClient(nil)
+	if sdk.httpClient == nil {
+		httpClient, err := createClient(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		sdk.httpClient = httpClient
 	}
 
-	builtins.RegisterBuiltins(sdk.client)
+	builtins.RegisterBuiltins(sdk.httpClient)
 
 	var err error
 
@@ -56,10 +79,11 @@ func WithLogger(logger zerolog.Logger) Option {
 	}
 }
 
-// WithGitHubClient sets the GitHub client used by Reposaur.
-func WithGitHubClient(client *github.Client) Option {
+// WithHTTPClient sets the HTTP client used by Reposaur's
+// built-in functions.
+func WithHTTPClient(client *http.Client) Option {
 	return func(sdk *Reposaur) {
-		sdk.client = client
+		sdk.httpClient = client
 	}
 }
 
@@ -69,8 +93,8 @@ func (sdk Reposaur) Logger() zerolog.Logger {
 }
 
 // Client returns Reposaur's GitHub client.
-func (sdk Reposaur) Client() *github.Client {
-	return sdk.client
+func (sdk Reposaur) HTTPClient() *http.Client {
+	return sdk.httpClient
 }
 
 // Engine returns Reposaur's policy engine.
@@ -78,40 +102,46 @@ func (sdk Reposaur) Engine() *policy.Engine {
 	return sdk.engine
 }
 
-// Check executes the policies loaded against one or more
-// fetchable GitHub objects.
-func (sdk Reposaur) Check(ctx context.Context, data map[string]interface{}) (output.Report, error) {
-	var reports []output.Report
-
-	for n, d := range data {
-		r, err := sdk.engine.Check(ctx, n, d)
-		if err != nil {
-			return output.Report{}, err
-		}
-
-		reports = append(reports, r)
+// Check executes the policies loaded with namespace against data
+func (sdk Reposaur) Check(ctx context.Context, namespace string, data interface{}) (output.Report, error) {
+	report, err := sdk.engine.Check(ctx, namespace, data)
+	if err != nil {
+		return output.Report{}, err
 	}
 
-	return mergeReports(reports), nil
+	return report, nil
 }
 
-func mergeReports(reports []output.Report) output.Report {
-	report := output.Report{
-		Rules:   make(map[string]*output.Rule),
-		Results: make(map[string]*output.Result),
+func createClient(ctx context.Context) (*http.Client, error) {
+	token := util.GetEnv(
+		"GITHUB_TOKEN",
+		"GH_TOKEN",
+	)
+
+	if token != nil {
+		return util.NewTokenHTTPClient(ctx, *token), nil
 	}
 
-	for _, r := range reports {
-		report.RuleCount += r.RuleCount
+	var (
+		appID = util.GetInt64Env(
+			"GITHUB_APP_ID",
+			"GH_APP_ID",
+		)
 
-		for k, v := range r.Rules {
-			report.Rules[k] = v
-		}
+		installationID = util.GetInt64Env(
+			"GITHUB_INSTALLATION_TOKEN",
+			"GH_INSTALLATION_TOKEN",
+		)
 
-		for k, v := range r.Results {
-			report.Results[k] = v
-		}
+		appPrivKey = util.GetEnv(
+			"GITHUB_APP_PRIVATE_KEY",
+			"GH_APP_PRIVATE_KEY",
+		)
+	)
+
+	if appID != nil && installationID != nil && appPrivKey != nil {
+		return util.NewInstallationHTTPClient(ctx, *appID, *installationID, *appPrivKey)
 	}
 
-	return report
+	return http.DefaultClient, nil
 }

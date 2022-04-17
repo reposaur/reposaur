@@ -1,13 +1,13 @@
 package builtins
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/pkg/github"
 )
 
 var GitHubGraphQLBuiltin = rego.Function{
@@ -22,7 +22,7 @@ var GitHubGraphQLBuiltin = rego.Function{
 	Memoize: true,
 }
 
-func GitHubGraphQLBuiltinImpl(client *github.Client) func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
+func GitHubGraphQLBuiltinImpl(client *http.Client) func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
 	return func(bctx rego.BuiltinContext, op1, op2 *ast.Term) (*ast.Term, error) {
 		var query string
 		var variables map[string]interface{}
@@ -38,10 +38,20 @@ func GitHubGraphQLBuiltinImpl(client *github.Client) func(bctx rego.BuiltinConte
 			"variables": variables,
 		}
 
-		req, err := client.NewRequest(http.MethodPost, "/graphql", body)
+		buf := &bytes.Buffer{}
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(body); err != nil {
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodPost, "/graphql", buf)
 		if err != nil {
 			return nil, err
 		}
+
+		req.Header.Set("User-Agent", "reposaur")
+		req.Header.Set("Content-Type", "application/json")
 
 		finalResp := GitHubResponse{}
 		resp, err := client.Do(req)
