@@ -18,6 +18,9 @@ fi
 
 url="https://github.com/$repo/releases/download/$tag/reposaur_${tag#v}_${os}_${arch}.tar.gz"
 
-curl -L "$url" > reposaur.tar.gz
-tar xvf reposaur.tar.gz
+echo "OS: $os ($arch)"
+echo "Tag: $tag"
+
+curl -sL "$url" > reposaur.tar.gz
+tar zxf reposaur.tar.gz
 rm reposaur.tar.gz
