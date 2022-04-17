@@ -26,3 +26,8 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+release:
+  github:
+    owner: reposaur
+    name: reposaur
+  prerelease: auto
