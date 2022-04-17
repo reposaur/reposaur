@@ -126,7 +126,7 @@ $ gh api /orgs/reposaur | reposaur
 ## Uploading a SARIF report to GitHub
 
 ```shell
-$ report=$(gh api /repos/reposaur/reposaur | reposaur)
+$ report=$(gh api /repos/reposaur/reposaur | reposaur | gzip | base64)
 
 $ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
     -f sarif="$report" \
@@ -152,7 +152,7 @@ $ gh api /orgs/reposaur/repos --paginate \
       commit_sha=$(gh api "/repos/$owner/$repo/branches/$branch" | jq -r '.commit.sha')
 
       gh api /repos/reposaur/reposaur/code-scanning/sarifs \
-        -f sarif="$(_r '.')" \
+        -f sarif="$(_r '.' | gzip | base64)" \
         -f commit_sha="$commit_sha" \
         -f ref="refs/heads/$branch"
     done
