@@ -7,10 +7,7 @@
 Reposaur allows users and organizations to execute policies against GitHub data to
 generate reports, perform auditing and more. The end-goal is to make it easy to
 perform such tasks in an automated way, enabling people to focus their time in solving
-any issues instead of looking for them.
-
-This is better explained with the example in [this Gist](https://gist.github.com/crqra/7ad034958dc02b141415241b321400d1), that executes a policy against
-every repository in an organization.
+any issues instead of looking for them ([see the examples](#examples)).
 
 :warning: While version 1.0.0 is not released, consider the API to be unstable.
 
