@@ -31,7 +31,7 @@ type Report struct {
 	Rules      map[string]*Rule   `json:"rules"`
 	Results    map[string]*Result `json:"results"`
 	RuleCount  int                `json:"ruleCount"`
-	Properties ReportProperties  `json:"properties"`
+	Properties ReportProperties   `json:"properties"`
 }
 
 func (r *Report) AddRule(rule *Rule) {
