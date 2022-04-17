@@ -14,7 +14,7 @@ every repository in an organization.
 
 :warning: While version 1.0.0 is not released, consider the API to be unstable.
 
-## Features
+# Features
 
 * Write custom policies using [Rego][rego] policy language
 * Simple, composable and easy-to-use CLI
@@ -22,23 +22,25 @@ every repository in an organization.
 * Output reports in JSON and SARIF formats
 * (TODO) Deploy as a GitHub App or use in GitHub Actions
 
-## Installation
+# Installation
+
+#### Using Script
 
 ```shell
 $ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh | bash
 ```
 
-### Using Go
+#### Using Go
 
 ```shell
 $ go install github.com/reposaur/reposaur
 ```
 
-## Guides
+# Guides
 
 - [Writing & testing your first policy](https://github.com/orgs/reposaur/discussions/1)
 
-## Usage
+# Usage
 
 ```bash
 $ reposaur --help
@@ -159,12 +161,12 @@ $ gh api /orgs/reposaur/repos --paginate \
   }
 ```
 
-## Policies
+# Policies
 
 Policies are written in [Rego][rego]. There are some particularities that
 Reposaur takes into consideration, detailed below.
 
-### Namespaces
+## Namespaces
 
 Reposaur can execute multiple policies against different kinds of data. To distinguish
 which policies should be executed against a particular set of data we use namespaces.
@@ -183,15 +185,15 @@ it's failing to detect a valid namespace, you can specify it manually using the 
 
 Reposaur will only query the rules that have the following prefixes (aka "kinds"):
 
-#### `violation_`, `fail_`, `error_`
+### `violation_`, `fail_`, `error_`
 
 Cause the CLI to exit with code `1`, the results in the SARIF report will have the `error` level.
 
-#### `warn_` 
+### `warn_` 
 
 Cause the CLI to exit with code `0`, the results in the SARIF report will have the `warning` level.
 
-#### `note_`, `info_`
+### `note_`, `info_`
 
 Cause the CLI to exit with code `0`, the results in the SARIF report will have the `note` level.
 
@@ -292,7 +294,17 @@ The response will include the following properties:
 * `error` - Any error that has occurred during the call
 * `statusCode` - The HTTP Response status code
 
-## Contributing
+# GitHub Action
+
+```yaml
+steps:
+  - name: Setup Reposaur
+    uses: reposaur/reposaur@main
+
+  - run: reposaur --help
+```
+
+# Contributing
 
 We appreciate every contribution, thanks for considering it!
 
@@ -304,7 +316,7 @@ We appreciate every contribution, thanks for considering it!
 [pulls]: https://github.com/reposaur/reposaur/pulls
 [discussions]: https://github.com/orgs/reposaur/discussions
 
-## License
+# License
 
 This project is released under the [MIT License](LICENSE).
 
