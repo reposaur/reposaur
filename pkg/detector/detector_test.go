@@ -166,7 +166,8 @@ func TestDetectRepositoryReportProperties(t *testing.T) {
 		"owner": map[string]interface{}{
 			"login": "reposaur",
 		},
-		"name": "reposaur",
+		"name":           "reposaur",
+		"default_branch": "main",
 	}
 
 	props, err := detector.DetectReportProperties("repository", data)
@@ -175,8 +176,9 @@ func TestDetectRepositoryReportProperties(t *testing.T) {
 	}
 
 	expected := output.ReportProperties{
-		"owner": "reposaur",
-		"repo":  "reposaur",
+		"owner":          "reposaur",
+		"repo":           "reposaur",
+		"default_branch": "main",
 	}
 
 	if !reflect.DeepEqual(expected, props) {
