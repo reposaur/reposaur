@@ -6,11 +6,17 @@ branding:
   icon: lock
   color: purple
 
+inputs:
+  version:
+    description: Version
+    default: main
+    required: false
+
 runs:
   using: composite
   steps:
     - run: |
-        curl -o- https://raw.githubusercontent.com/reposaur/reposaur/v0.3.0/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/reposaur/reposaur/${{ inputs.version }}/install.sh | bash
         echo "${{ github.action_path }}" >> $GITHUB_PATH
       working-directory: ${{ github.action_path }}
       shell: bash
