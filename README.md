@@ -59,14 +59,43 @@ Flags:
 
 ### Feeding data from `gh` CLI
 
-```bash
+```shell
 $ gh api /repos/reposaur/reposaur | reposaur
 ```
 
 ### Preparing a SARIF report to send to GitHub
 
-```bash
+```shell
 $ gh api /repos/reposaur/reposaur | reposaur | gzip | base64
+```
+
+### Working with multiple repositories
+
+The example below will execute Reposaur against every repository
+in the "reposaur" organization, combining the reports in a JSON array:
+
+```shell
+gh api /orgs/reposaur/repos --paginate \
+| jq -r '.[] | @base64' \
+| {
+  while read r; do
+    _r() {
+      echo ${r} | base64 -d | jq -r ${1}
+    }
+
+    owner=$(_r '.owner.login')
+    repo=$(_r '.name')
+    branch=$(_r '.default_branch')
+    report=$(_r '.' | reposaur -p ../aws-lambda/policy | jq -c)
+
+    printf '{"owner": "%s", "repo": "%s", "branch": "%s", "report": %s}\n' "$owner" "$repo" "$branch" "$report"
+  done
+} \
+| jq -s '.'
+# [
+#   {"owner": "reposaur", "repo": "reposaur", "branch": "main", "report": { ... }},
+#   ...
+# ]
 ```
 
 ## Policies
