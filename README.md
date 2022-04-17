@@ -48,9 +48,6 @@ Executes a set of Rego policies against the data provided
 Usage:
   reposaur [flags]
 
-Aliases:
-  reposaur, c
-
 Flags:
   -f, --format string      report output format (one of 'json' and 'sarif') (default "sarif")
   -h, --help               help for reposaur
