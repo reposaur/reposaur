@@ -1,6 +1,7 @@
 # Reposaur
 
-<a href="https://pkg.go.dev/github.com/reposaur/reposaur?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="GoDoc"></a>
+[![Go Reference](https://pkg.go.dev/badge/github.com/reposaur/reposaur.svg)](https://pkg.go.dev/github.com/reposaur/reposaur)
+[![Go Report Card](https://goreportcard.com/badge/github.com/reposaur/reposaur)](https://goreportcard.com/report/github.com/reposaur/reposaur)
 
 > Audit your GitHub data using custom policies written in [Rego][rego].
 
