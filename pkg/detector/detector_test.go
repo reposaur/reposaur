@@ -1,9 +1,11 @@
 package detector_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/reposaur/reposaur/pkg/detector"
+	"github.com/reposaur/reposaur/pkg/output"
 )
 
 func TestDetectIssueNamespace(t *testing.T) {
@@ -93,5 +95,112 @@ func TestDetectUserNamespace(t *testing.T) {
 
 	if ns != expected {
 		t.Errorf("expected namespace to be %s, got '%s'", expected, ns)
+	}
+}
+
+func TestDetectIssueReportProperties(t *testing.T) {
+	data := map[string]interface{}{
+		"id":     123,
+		"number": 123,
+	}
+
+	props, err := detector.DetectReportProperties("issue", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := output.ReportProperties{
+		"id":     float64(123),
+		"number": float64(123),
+	}
+
+	if !reflect.DeepEqual(expected, props) {
+		t.Errorf("expected report properties to be %v, got %v", expected, props)
+	}
+}
+
+func TestDetectOrganizationReportProperties(t *testing.T) {
+	data := map[string]interface{}{
+		"login": "reposaur",
+		"name":  "Reposaur",
+	}
+
+	props, err := detector.DetectReportProperties("organization", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := output.ReportProperties{
+		"login": "reposaur",
+		"name":  "Reposaur",
+	}
+
+	if !reflect.DeepEqual(expected, props) {
+		t.Errorf("expected report properties to be %v, got %v", expected, props)
+	}
+}
+
+func TestDetectPullRequestReportProperties(t *testing.T) {
+	data := map[string]interface{}{
+		"id":     123,
+		"number": 123,
+	}
+
+	props, err := detector.DetectReportProperties("pull_request", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := output.ReportProperties{
+		"id":     float64(123),
+		"number": float64(123),
+	}
+
+	if !reflect.DeepEqual(expected, props) {
+		t.Errorf("expected report properties to be %v, got %v", expected, props)
+	}
+}
+
+func TestDetectRepositoryReportProperties(t *testing.T) {
+	data := map[string]interface{}{
+		"owner": map[string]interface{}{
+			"login": "reposaur",
+		},
+		"name": "reposaur",
+	}
+
+	props, err := detector.DetectReportProperties("repository", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := output.ReportProperties{
+		"owner": "reposaur",
+		"repo":  "reposaur",
+	}
+
+	if !reflect.DeepEqual(expected, props) {
+		t.Errorf("expected report properties to be %v, got %v", expected, props)
+	}
+}
+
+func TestDetectUserReportProperties(t *testing.T) {
+	data := map[string]interface{}{
+		"login": "reposaur",
+		"name":  "Reposaur",
+	}
+
+	props, err := detector.DetectReportProperties("user", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := output.ReportProperties{
+		"login": "reposaur",
+		"name":  "Reposaur",
+	}
+
+	if !reflect.DeepEqual(expected, props) {
+		t.Errorf("expected report properties to be %v, got %v", expected, props)
 	}
 }

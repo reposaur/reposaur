@@ -14,6 +14,11 @@ func NewSarifReport(report Report) (*sarif.Report, error) {
 
 	run := sarif.NewRun("Reposaur", "https://github.com/reposaur/reposaur")
 
+	run.Properties = sarif.Properties{}
+	for k, v := range report.Properties {
+		run.Properties[k] = v
+	}
+
 	for _, rule := range report.Rules {
 		props := sarif.Properties{}
 
@@ -34,7 +39,6 @@ func NewSarifReport(report Report) (*sarif.Report, error) {
 			).
 			WithMarkdownHelp(rule.Description).
 			WithProperties(props)
-
 	}
 
 	for _, result := range report.Results {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
@@ -41,21 +42,67 @@ func NewCommand() *cobra.Command {
 			return err
 		}
 
-		namespace := params.namespace
+		var data []interface{}
 
-		if namespace == "" {
-			namespace, err = detector.DetectNamespace(input)
-			if err != nil {
-				return err
+		switch i := input.(type) {
+		case map[string]interface{}:
+			data = append(data, i)
+
+		case []interface{}:
+			for _, d := range i {
+				data = append(data, d)
 			}
 		}
 
-		report, err := rs.Check(cmd.Context(), namespace, input)
-		if err != nil {
-			return err
+		var (
+			wg       = sync.WaitGroup{}
+			reportCh = make(chan output.Report, len(data))
+		)
+
+		wg.Add(len(data))
+
+		for _, d := range data {
+			namespace := params.namespace
+
+			if namespace == "" {
+				namespace, err = detector.DetectNamespace(d)
+				if err != nil {
+					return err
+				}
+			}
+
+			props, err := detector.DetectReportProperties(namespace, d)
+			if err != nil {
+				return err
+			}
+
+			go func(namespace string, props output.ReportProperties, data interface{}) {
+				r, err := rs.Check(cmd.Context(), namespace, data)
+				if err != nil {
+					panic(err)
+				}
+
+				r.Properties = props
+				reportCh <- r
+
+				wg.Done()
+			}(namespace, props, d)
 		}
 
-		return writeOutput(report, params.outputFormat, os.Stdout)
+		wg.Wait()
+		close(reportCh)
+
+		var reports []output.Report
+
+		for r := range reportCh {
+			reports = append(reports, r)
+		}
+
+		return writeOutput(
+			reports,
+			params.outputFormat,
+			os.Stdout,
+		)
 	}
 
 	cmd.Flags().StringVarP(
@@ -79,28 +126,35 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
-func writeOutput(report output.Report, format string, w io.Writer) error {
-	switch strings.ToLower(format) {
-	case "sarif":
-		sarifReport, err := output.NewSarifReport(report)
-		if err != nil {
-			return err
-		}
+func writeOutput(reports []output.Report, format string, w io.Writer) error {
+	format = strings.ToLower(format)
 
-		return sarifReport.PrettyWrite(w)
-
-	case "json":
-		data, err := json.MarshalIndent(report, "", "  ")
-		if err != nil {
-			return err
-		}
-
-		if _, err := w.Write(data); err != nil {
-			return err
-		}
-
-		return nil
+	if format != "json" && format != "sarif" {
+		return fmt.Errorf("unknown output format '%s'", format)
 	}
 
-	return fmt.Errorf("unknown output format '%s'", format)
+	var x []interface{}
+
+	for _, r := range reports {
+		if format == "json" {
+			x = append(x, r)
+			continue
+		}
+
+		sarifReport, err := output.NewSarifReport(r)
+		if err != nil {
+			return err
+		}
+
+		x = append(x, sarifReport)
+	}
+
+	dec := json.NewEncoder(w)
+	dec.SetIndent("", "  ")
+
+	if len(x) == 1 {
+		return dec.Encode(x[0])
+	}
+
+	return dec.Encode(x)
 }

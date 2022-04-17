@@ -28,9 +28,10 @@ var SecuritySeverityMap = map[string]string{
 }
 
 type Report struct {
-	Rules     map[string]*Rule   `json:"rules"`
-	Results   map[string]*Result `json:"results"`
-	RuleCount int                `json:"ruleCount"`
+	Rules      map[string]*Rule   `json:"rules"`
+	Results    map[string]*Result `json:"results"`
+	RuleCount  int                `json:"ruleCount"`
+	Properties ReportProperties  `json:"properties"`
 }
 
 func (r *Report) AddRule(rule *Rule) {
@@ -41,6 +42,8 @@ func (r *Report) AddRule(rule *Rule) {
 func (r *Report) AddResult(result *Result) {
 	r.Results[result.Rule.UID()] = result
 }
+
+type ReportProperties map[string]interface{}
 
 type Result struct {
 	Rule    *Rule  `json:"rule"`

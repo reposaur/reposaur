@@ -57,45 +57,106 @@ Flags:
   -p, --policy strings     set the path to a policy or directory of policies (default [./policy])
 ```
 
-### Feeding data from `gh` CLI
+# Examples
+
+The following examples assume we're running Reposaur in a directory
+with the following policies inside `./policy` directory:
+
+_./policy/repository.go_
+```rego
+package repository
+
+# METADATA
+# title: Repository description is empty
+# description: >
+#   It's important that repositoryies have a short but
+#   meaningful description. A description helps other people
+#   finding the repository more easily and understanding what
+#   the repository is all about.
+warn_description_empty {
+	input.description == null
+}
+```
+
+_./policy/pull_request.go_
+```rego
+package pull_request
+
+# METADATA
+# title: Pull Request title is malformed
+# description: Pull Request titles must follow [Conventional Commits](https://www.conventionalcommits.org) guidelines.
+warn_title_malformed {
+	not regex.match("(?i)^(\\w+)(\\(.*\\))?:.*", input.title)
+}
+```
+
+_./policy/organization.go_
+```rego
+package organization
+
+# METADATA
+# title: Organization has 2FA requirement disabled
+# description: Organization doesn't require members to have 2FA enabled
+warn_two_factor_requirement_disabled {
+	input.two_factor_requirement_enabled == false
+}
+```
+
+## Executing the policies against a single repository
 
 ```shell
 $ gh api /repos/reposaur/reposaur | reposaur
+# { ... }
 ```
 
-### Preparing a SARIF report to send to GitHub
+## Executing the policies against every repository in an organization
 
 ```shell
-$ gh api /repos/reposaur/reposaur | reposaur | gzip | base64
+$ gh api /orgs/reposaur/repos --paginate | reposaur
+# [{ ... }, ...]
 ```
 
-### Working with multiple repositories
-
-The example below will execute Reposaur against every repository
-in the "reposaur" organization, combining the reports in a JSON array:
+## Executing the policies against an organization
 
 ```shell
-gh api /orgs/reposaur/repos --paginate \
-| jq -r '.[] | @base64' \
-| {
-  while read r; do
-    _r() {
-      echo ${r} | base64 -d | jq -r ${1}
-    }
+$ gh api /orgs/reposaur | reposaur
+# { ... }
+```
 
-    owner=$(_r '.owner.login')
-    repo=$(_r '.name')
-    branch=$(_r '.default_branch')
-    report=$(_r '.' | reposaur -p ../aws-lambda/policy | jq -c)
+## Uploading a SARIF report to GitHub
 
-    printf '{"owner": "%s", "repo": "%s", "branch": "%s", "report": %s}\n' "$owner" "$repo" "$branch" "$report"
-  done
-} \
-| jq -s '.'
-# [
-#   {"owner": "reposaur", "repo": "reposaur", "branch": "main", "report": { ... }},
-#   ...
-# ]
+```shell
+$ report=$(gh api /repos/reposaur/reposaur | reposaur)
+
+$ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
+    -f sarif="$report" \
+    -f commit_sha="..." \
+    -f ref="..."
+```
+
+## Uploading a SARIF report for multiple repositories
+
+```shell
+$ gh api /orgs/reposaur/repos --paginate \
+  | reposaur \
+  | jq -r '.[] | @base64' \
+  | {
+    while read r; do
+      _r() {
+        echo ${r} | base64 -d | jq -r ${1}
+      }
+
+      owner=$(_r '.runs[0].properties.owner')
+      repo=$(_r '.runs[0].properties.repo')
+      branch=$(_r '.runs[0].properties.default_branch')
+      commit_sha=$(gh api "/repos/$owner/$repo/branches/$branch" | jq -r '.commit.sha')
+
+      gh api /repos/reposaur/reposaur/code-scanning/sarifs \
+        -f sarif="$(_r '.')" \
+        -f commit_sha="$commit_sha" \
+        -f ref="refs/heads/$branch"
+    done
+  }
 ```
 
 ## Policies
