@@ -9,8 +9,9 @@ generate reports, perform auditing and more. The end-goal is to make it easy to
 perform such tasks in an automated way, enabling people to focus their time in solving
 any issues instead of looking for them ([see the examples](#examples)).
 
-:warning: While version 1.0.0 is not released, consider the API to be unstable. The CLI will most probably
-not change much, except for the fact that it might get a `test` command before the first stable release.
+:warning: While version `v1.0.0` is not released, consider the API to be _unstable_. The CLI and its output
+will most probably not change much, except for the fact that it might get a `test` command before the first
+stable release.
 
 # Features
 
