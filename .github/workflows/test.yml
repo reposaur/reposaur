@@ -9,6 +9,7 @@ env:
 
 jobs:
   golangci-lint:
+    name: Golang CI Lint
     runs-on: ubuntu-latest
     steps:
       - name: Setup Go
