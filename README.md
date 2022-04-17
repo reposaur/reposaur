@@ -12,6 +12,8 @@ any issues instead of looking for them.
 This is better explained with the example in [this Gist](https://gist.github.com/crqra/7ad034958dc02b141415241b321400d1), that executes a policy against
 every repository in an organization.
 
+:warning: While version 1.0.0 is not released, consider the API to be unstable.
+
 ## Features
 
 * Write custom policies using [Rego][rego] policy language
