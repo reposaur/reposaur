@@ -1,0 +1,18 @@
+name: Reposaur
+author: Reposaur Authors
+description: Audit your GitHub data using custom policies written in Rego
+
+branding:
+  icon: lock
+  color: purple
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        echo "https://raw.githubusercontent.com/reposaur/reposaur/${{ github.action_ref }}/install.sh"
+        curl -o- "https://raw.githubusercontent.com/reposaur/reposaur/${{ github.action_ref }}/install.sh" | bash
+        ls -al
+        echo "${{ github.action_path }}" >> $GITHUB_PATH
+      working-directory: ${{ github.action_path }}
+      shell: bash
