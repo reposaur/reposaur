@@ -65,7 +65,7 @@ Flags:
 
 The following examples assume we're running Reposaur in a directory
 with the following policies inside `./policy` directory. If you're looking 
-for more examples of policies check the reposaur/policy repository.
+for more examples of policies check the [reposaur/policy](https://github.com/reposaur/policy) repository.
 
 _./policy/repository.go_
 ```rego
