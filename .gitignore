@@ -2,3 +2,4 @@
 /config.yaml
 /policy/
 /testdata/events/_*.json
+dist/
