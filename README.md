@@ -1,8 +1,8 @@
 # Reposaur
 
-[![Tests](https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?longCache=true&label=Test&logo=github%20actions&logoColor=fff)](https://github.com/reposaur/reposaur/actions/workflows/test.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reposaur/reposaur.svg)](https://pkg.go.dev/github.com/reposaur/reposaur)
 [![Go Report Card](https://goreportcard.com/badge/github.com/reposaur/reposaur)](https://goreportcard.com/report/github.com/reposaur/reposaur)
+[![Tests](https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?longCache=true&label=Test&logo=github%20actions&logoColor=fff)](https://github.com/reposaur/reposaur/actions/workflows/test.yml)
 
 > Audit your GitHub data using custom policies written in [Rego][rego].
 
