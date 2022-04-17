@@ -16,11 +16,13 @@ every repository in an organization.
 
 # Features
 
-* Write custom policies using [Rego][rego] policy language
-* Simple, composable and easy-to-use CLI
-* Extendable using the Go SDK
-* Output reports in JSON and SARIF formats
-* (TODO) Deploy as a GitHub App or use in GitHub Actions
+* [x] Write custom policies using [Rego][rego] policy language
+* [x] Simple, composable and easy-to-use CLI
+* [x] Extendable using the Go SDK
+* [x] Output reports in JSON and SARIF formats
+* [x] Use in GitHub Actions
+* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) #1
+* [ ] (TODO) Deploy as a GitHub App (possible but no official guide yet) #2
 
 # Installation
 
