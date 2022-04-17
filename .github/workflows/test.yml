@@ -1,0 +1,91 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+env:
+  GO111MODULE: on
+
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.17"
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Golang CI Lint
+        uses: golangci/golangci-lint-action@v3.1.0
+        with:
+          version: latest
+          args: --verbose
+
+  test-unix:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu
+          - macOS
+        go:
+          - 14
+          - 15
+          - 16
+          - 17
+          - 18
+    name: "${{ matrix.platform }} | 1.${{ matrix.go }}.x"
+    runs-on: ${{ matrix.platform }}-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.${{ matrix.go }}.x
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-1.${{ matrix.go }}.x-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-1.${{ matrix.go }}.x-
+
+      - name: Test
+        run: go test ./...
+
+  test-win:
+    name: MINGW64
+    defaults:
+      run:
+        shell: msys2 {0}
+    runs-on: windows-latest
+    steps:
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >
+            git
+            make
+            unzip
+            mingw-w64-x86_64-go
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.go }}-
+
+      - name: Test
+        run: go test ./...
