@@ -21,8 +21,8 @@ every repository in an organization.
 * [x] Extendable using the Go SDK
 * [x] Output reports in JSON and SARIF formats
 * [x] Use in GitHub Actions ([see more](#use-in-github-actions))
-* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) reposaur/reposaur#1
-* [ ] Deploy as a GitHub App (possible but no official guide yet) reposaur/reposaur#2
+* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) (see reposaur/reposaur#1)
+* [ ] Deploy as a GitHub App (possible but no official guide yet) (see reposaur/reposaur#2)
 
 # Installation
 
