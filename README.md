@@ -16,13 +16,13 @@ every repository in an organization.
 
 # Features
 
-* [x] Write custom policies using [Rego][rego] policy language
-* [x] Simple, composable and easy-to-use CLI
+* [x] Write custom policies using [Rego][rego] policy language ([see more](#policies))
+* [x] Simple, composable and easy-to-use CLI ([see more](#examples))
 * [x] Extendable using the Go SDK
 * [x] Output reports in JSON and SARIF formats
-* [x] Use in GitHub Actions
-* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) #1
-* [ ] (TODO) Deploy as a GitHub App (possible but no official guide yet) #2
+* [x] Use in GitHub Actions ([see more](#use-in-github-actions))
+* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) reposaur/reposaur#1
+* [ ] Deploy as a GitHub App (possible but no official guide yet) reposaur/reposaur#2
 
 # Installation
 
@@ -296,7 +296,7 @@ The response will include the following properties:
 * `error` - Any error that has occurred during the call
 * `statusCode` - The HTTP Response status code
 
-# GitHub Action
+# Use in GitHub Actions
 
 ```yaml
 steps:
