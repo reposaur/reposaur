@@ -105,6 +105,11 @@ func GitHubRequestBuiltinImpl(client *http.Client) func(bctx rego.BuiltinContext
 
 		finalResp.StatusCode = resp.StatusCode
 
+		if finalResp.StatusCode == http.StatusForbidden {
+			b := finalResp.Body.(map[string]interface{})
+			return nil, fmt.Errorf("forbidden: %s", b["message"])
+		}
+
 		val, err := ast.InterfaceToValue(finalResp)
 		if err != nil {
 			return nil, err

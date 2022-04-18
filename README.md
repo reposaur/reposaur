@@ -266,8 +266,12 @@ resp := github.request("GET /repos/{owner}/{repo}/branches/{branch}/protection",
 The response will include the following properties:
 
 * `body` - The HTTP Response body
-* `error` - Any error that has occurred during the call
 * `statusCode` - The HTTP Response status code
+
+Forbidden errors are treated in a special manner and will cause
+policy execution to halt. Usually these errors happen when authentication is
+required, a token is invalid or doesn't have sufficient permissions or rate limit
+has been exceeded.
 
 ### `github.graphql`
 
@@ -292,8 +296,12 @@ resp := github.graphql(
 The response will include the following properties:
 
 * `body` - The HTTP Response body
-* `error` - Any error that has occurred during the call
 * `statusCode` - The HTTP Response status code
+
+Forbidden errors are treated in a special manner and will cause
+policy execution to halt. Usually these errors happen when authentication is
+required, a token is invalid or doesn't have sufficient permissions or rate limit
+has been exceeded.
 
 # Use in GitHub Actions
 
