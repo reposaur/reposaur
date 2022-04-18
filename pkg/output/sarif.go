@@ -42,7 +42,7 @@ func NewSarifReport(report Report) (*sarif.Report, error) {
 	}
 
 	for _, result := range report.Results {
-		if !result.Passed {
+		if !result.Passed && !result.Skipped {
 			run.AddResult(result.Rule.UID()).
 				WithLevel(strings.ToLower(result.Rule.Severity)).
 				WithMessage(sarif.NewTextMessage(result.Rule.Title)).
