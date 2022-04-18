@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
+	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/open-policy-agent/opa v0.39.0
 	github.com/owenrumney/go-sarif v1.1.1
 	github.com/rs/zerolog v1.26.1

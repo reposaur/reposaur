@@ -6,16 +6,17 @@ import (
 	"net/http"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
+	"github.com/gregjones/httpcache"
 	"golang.org/x/oauth2"
 )
 
 const defaultGitHubHost = "api.github.com"
 
-type githubTransporter struct {
-	tr http.RoundTripper
+type githubTransport struct {
+	Transport http.RoundTripper
 }
 
-func (t githubTransporter) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ghHost := defaultGitHubHost
 
 	if host := GetEnv("GITHUB_HOST", "GH_HOST"); host != nil {
@@ -25,27 +26,32 @@ func (t githubTransporter) RoundTrip(req *http.Request) (*http.Response, error) 
 	req.URL.Host = ghHost
 	req.URL.Scheme = "https"
 
-	return t.tr.RoundTrip(req)
+	return t.Transport.RoundTrip(req)
 }
 
 // NewTokenHTTPClient creates an http.Client with a
 // oauth2.StaticTokenSource using the provided token.
 func NewTokenHTTPClient(ctx context.Context, token string) *http.Client {
-	ts := oauth2.StaticTokenSource(
+	ghTransport := githubTransport{
+		Transport: http.DefaultTransport,
+	}
+
+	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
+		Transport: ghTransport,
+	})
+
+	tokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{
 			AccessToken: token,
 		},
 	)
 
-	tc := oauth2.NewClient(ctx, ts)
+	tokenTransport := oauth2.NewClient(ctx, tokenSource).Transport
 
-	httpClient := &http.Client{
-		Transport: githubTransporter{
-			tr: tc.Transport,
-		},
-	}
+	cacheTransport := httpcache.NewMemoryCacheTransport()
+	cacheTransport.Transport = tokenTransport
 
-	return httpClient
+	return cacheTransport.Client()
 }
 
 // NewInstallationHTTPClient creates an http.Client with authenticated
@@ -60,16 +66,17 @@ func NewInstallationHTTPClient(ctx context.Context, appID, installationID int64,
 		return nil, err
 	}
 
-	itr, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privKey)
+	ghTransport := githubTransport{
+		Transport: http.DefaultTransport,
+	}
+
+	installationTransport, err := ghinstallation.New(ghTransport, appID, installationID, privKey)
 	if err != nil {
 		return nil, err
 	}
 
-	httpClient := &http.Client{
-		Transport: githubTransporter{
-			tr: itr,
-		},
-	}
+	cacheTransport := httpcache.NewMemoryCacheTransport()
+	cacheTransport.Transport = installationTransport
 
-	return httpClient, nil
+	return cacheTransport.Client(), nil
 }
