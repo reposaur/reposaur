@@ -94,7 +94,7 @@ func GitHubRequestBuiltinImpl(client *http.Client) func(bctx rego.BuiltinContext
 		finalResp := GitHubResponse{}
 		resp, err := client.Do(req)
 		if err != nil {
-			finalResp.Error = err.Error()
+			return nil, err
 		}
 		defer resp.Body.Close()
 

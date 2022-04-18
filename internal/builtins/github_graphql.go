@@ -56,8 +56,9 @@ func GitHubGraphQLBuiltinImpl(client *http.Client) func(bctx rego.BuiltinContext
 		finalResp := GitHubResponse{}
 		resp, err := client.Do(req)
 		if err != nil {
-			finalResp.Error = err.Error()
+			return nil, err
 		}
+
 		dec := json.NewDecoder(resp.Body)
 		if err := dec.Decode(&finalResp.Body); err != nil {
 			return nil, err

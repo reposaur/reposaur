@@ -171,6 +171,7 @@ func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
 		rego.Query(query),
 		rego.Input(input),
 		rego.Compiler(e.compiler),
+		rego.StrictBuiltinErrors(true),
 		rego.PrintHook(topdown.NewPrintHook(os.Stderr)),
 	)
 }
