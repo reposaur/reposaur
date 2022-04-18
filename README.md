@@ -198,6 +198,48 @@ Cause the CLI to exit with code `0`, the results in the SARIF report will have t
 
 Cause the CLI to exit with code `0`, the results in the SARIF report will have the `note` level.
 
+### Skipping rules
+
+Rules can be skipped by defining a `skip` rule. For example, if have a rule that says repositories
+should be internal but don't want to apply it to public repositories, only private ones, we could
+write the following policy:
+
+```rego
+package repository
+
+skip[rules] {
+	input.visibility == "public"
+	rules := ["visibility_not_internal"]
+}
+
+violation_visibility_not_internal {
+	input.visibility != "internal"
+}
+```
+
+**Skipping by default**
+
+When we have more cases we want to skip than the ones we care about, we can also write
+a default skip rule. For example, if we want to skip every repository except the ones that have
+some naming characteristics, we could write the following policy:
+
+```rego
+package repository
+
+# skips this rule by default
+default skip = {"rules": ["not_that_awesome"]}
+
+# same as returning an empty rules list, which
+# means every rule will be executed if matched
+skip {
+	endswith(input.name, "-awesome")
+}
+
+violation_not_that_awesome {
+	not contains(input.topics, "awesome")
+}
+```
+
 ## Metadata
 
 Your rules can be enhanced with additional information that will be added in the final report, independently of the output format.
