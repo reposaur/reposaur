@@ -3,6 +3,7 @@ package sdk
 import (
 	"context"
 	"net/http"
+	"os"
 
 	"github.com/reposaur/reposaur/internal/builtins"
 	"github.com/reposaur/reposaur/internal/policy"
@@ -43,8 +44,12 @@ type Reposaur struct {
 // The default HTTP client will use the default host `api.github.com`. Can
 // be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
 func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, error) {
+	cw := zerolog.NewConsoleWriter()
+	cw.Out = os.Stderr
+	logger := zerolog.New(cw).With().Timestamp().Logger()
+
 	sdk := &Reposaur{
-		logger: zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Logger(),
+		logger: logger,
 	}
 
 	for _, opt := range opts {
@@ -52,7 +57,7 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 	}
 
 	if sdk.httpClient == nil {
-		httpClient, err := createClient(ctx)
+		httpClient, err := createClient(ctx, sdk.logger)
 		if err != nil {
 			return nil, err
 		}
@@ -112,14 +117,14 @@ func (sdk Reposaur) Check(ctx context.Context, namespace string, data interface{
 	return report, nil
 }
 
-func createClient(ctx context.Context) (*http.Client, error) {
+func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, error) {
 	token := util.GetEnv(
 		"GITHUB_TOKEN",
 		"GH_TOKEN",
 	)
 
 	if token != nil {
-		return util.NewTokenHTTPClient(ctx, *token), nil
+		return util.NewTokenHTTPClient(ctx, logger, *token), nil
 	}
 
 	var (
@@ -140,7 +145,7 @@ func createClient(ctx context.Context) (*http.Client, error) {
 	)
 
 	if appID != nil && installationID != nil && appPrivKey != nil {
-		return util.NewInstallationHTTPClient(ctx, *appID, *installationID, *appPrivKey)
+		return util.NewInstallationHTTPClient(ctx, logger, *appID, *installationID, *appPrivKey)
 	}
 
 	return http.DefaultClient, nil

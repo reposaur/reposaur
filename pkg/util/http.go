@@ -4,16 +4,22 @@ import (
 	"context"
 	"encoding/base64"
 	"net/http"
+	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/gregjones/httpcache"
+	"github.com/rs/zerolog"
 	"golang.org/x/oauth2"
 )
 
-const defaultGitHubHost = "api.github.com"
+const (
+	defaultGitHubHost = "api.github.com"
+	retryAfterHeader  = "Retry-After"
+)
 
 type githubTransport struct {
-	Transport http.RoundTripper
+	logger    zerolog.Logger
+	transport http.RoundTripper
 }
 
 func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -26,14 +32,43 @@ func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL.Host = ghHost
 	req.URL.Scheme = "https"
 
-	return t.Transport.RoundTrip(req)
+	return t.throttle(req)
+}
+
+func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
+	resp, err := t.transport.RoundTrip(req)
+	if err != nil {
+		return nil, err
+	}
+
+	retryAfterVal := resp.Header.Get(retryAfterHeader)
+	if retryAfterVal == "" {
+		return resp, nil
+	}
+
+	retryAfter, err := time.ParseDuration(retryAfterVal + "s")
+	if err != nil {
+		return nil, err
+	}
+
+	logger := t.logger.With().
+		Str("path", req.URL.Path).
+		Dur("retry after", retryAfter).
+		Logger()
+
+	logger.Info().Msg("Hit secondary rate limit. Waiting before trying...")
+	time.Sleep(retryAfter)
+	logger.Info().Msg("Continuing...")
+
+	return t.RoundTrip(req)
 }
 
 // NewTokenHTTPClient creates an http.Client with a
 // oauth2.StaticTokenSource using the provided token.
-func NewTokenHTTPClient(ctx context.Context, token string) *http.Client {
-	ghTransport := githubTransport{
-		Transport: http.DefaultTransport,
+func NewTokenHTTPClient(ctx context.Context, logger zerolog.Logger, token string) *http.Client {
+	ghTransport := &githubTransport{
+		logger:    logger,
+		transport: http.DefaultTransport,
 	}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
@@ -59,7 +94,7 @@ func NewTokenHTTPClient(ctx context.Context, token string) *http.Client {
 // automatically.
 //
 // The Private Key provided must be Base64 encoded.
-func NewInstallationHTTPClient(ctx context.Context, appID, installationID int64, appPrivKey string) (*http.Client, error) {
+func NewInstallationHTTPClient(ctx context.Context, logger zerolog.Logger, appID, installationID int64, appPrivKey string) (*http.Client, error) {
 	// private key is base64 encoded
 	privKey, err := base64.RawStdEncoding.DecodeString(appPrivKey)
 	if err != nil {
@@ -67,7 +102,8 @@ func NewInstallationHTTPClient(ctx context.Context, appID, installationID int64,
 	}
 
 	ghTransport := githubTransport{
-		Transport: http.DefaultTransport,
+		logger:    logger,
+		transport: http.DefaultTransport,
 	}
 
 	installationTransport, err := ghinstallation.New(ghTransport, appID, installationID, privKey)
