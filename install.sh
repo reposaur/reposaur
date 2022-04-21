@@ -5,7 +5,7 @@ set -e
 os=""
 arch="$(uname -m)"
 repo="reposaur/reposaur"
-tag="v0.4.0"
+tag="v0.5.0"
 filename=""
 
 if uname -a | grep Msys > /dev/null; then
