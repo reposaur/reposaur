@@ -115,7 +115,7 @@ $ gh api /repos/reposaur/reposaur | reposaur
 ## Executing the policies against every repository in an organization
 
 ```shell
-$ gh api /orgs/reposaur/repos --paginate | reposaur
+$ gh api /orgs/reposaur/repos --paginate | jq -s add | reposaur
 # [{ ... }, ...]
 ```
 
