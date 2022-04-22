@@ -61,9 +61,9 @@ func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
 		Dur("retry after", retryAfter).
 		Logger()
 
-	logger.Info().Msg("Hit secondary rate limit. Waiting before trying...")
+	logger.Info().Msg("Hit secondary rate limit. Waiting before trying")
 	time.Sleep(retryAfter)
-	logger.Info().Msg("Continuing...")
+	logger.Info().Msg("Continuing")
 
 	return t.RoundTrip(req)
 }
