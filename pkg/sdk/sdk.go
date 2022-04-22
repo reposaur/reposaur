@@ -44,12 +44,8 @@ type Reposaur struct {
 // The default HTTP client will use the default host `api.github.com`. Can
 // be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
 func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, error) {
-	cw := zerolog.NewConsoleWriter()
-	cw.Out = os.Stderr
-	logger := zerolog.New(cw).With().Timestamp().Logger()
-
 	sdk := &Reposaur{
-		logger: logger,
+		logger: zerolog.New(os.Stderr),
 	}
 
 	for _, opt := range opts {
