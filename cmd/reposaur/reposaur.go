@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/reposaur/reposaur/internal/build"
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
@@ -18,6 +19,7 @@ type Params struct {
 	namespace    string
 	outputFormat string
 	policyPaths  []string
+	showVersion  bool
 }
 
 var cmd = &cobra.Command{
@@ -30,6 +32,11 @@ func NewCommand() *cobra.Command {
 	params := Params{}
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		if params.showVersion {
+			fmt.Printf("reposaur version %s\n", build.Version)
+			return nil
+		}
+
 		var input interface{}
 
 		err := json.NewDecoder(os.Stdin).Decode(&input)
@@ -122,6 +129,8 @@ func NewCommand() *cobra.Command {
 		"policy", "p", []string{"./policy"},
 		"set the path to a policy or directory of policies",
 	)
+
+	cmd.Flags().BoolVarP(&params.showVersion, "version", "v", false, "show reposaur version")
 
 	return cmd
 }
