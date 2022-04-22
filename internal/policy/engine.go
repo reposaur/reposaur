@@ -20,11 +20,15 @@ type Engine struct {
 }
 
 func Load(ctx context.Context, policyPaths []string) (*Engine, error) {
-	policies, err := allRegos(policyPaths)
+	policies, err := loader.NewFileLoader().
+		WithProcessAnnotation(true).
+		Filtered(policyPaths, isRegoFile)
 	if err != nil {
-		return nil, fmt.Errorf("load: %w", err)
-	} else if len(policies.Modules) == 0 {
-		return nil, fmt.Errorf("no policies found in %v", policyPaths)
+		return nil, &PolicyLoaderError{err}
+	}
+
+	if len(policies.Modules) == 0 {
+		return nil, &NoPoliciesError{policyPaths}
 	}
 
 	modules := policies.ParsedModules()
@@ -176,10 +180,6 @@ func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
 	)
 }
 
-func allRegos(paths []string) (*loader.Result, error) {
-	return loader.NewFileLoader().
-		WithProcessAnnotation(true).
-		Filtered(paths, func(_ string, info os.FileInfo, depth int) bool {
-			return !info.IsDir() && !strings.HasSuffix(info.Name(), bundle.RegoExt)
-		})
+func isRegoFile(_ string, info os.FileInfo, depth int) bool {
+	return !info.IsDir() && !strings.HasSuffix(info.Name(), bundle.RegoExt)
 }
