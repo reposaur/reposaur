@@ -32,6 +32,11 @@ func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL.Host = ghHost
 	req.URL.Scheme = "https"
 
+	t.logger.Debug().
+		Str("method", req.Method).
+		Str("url", req.URL.String()).
+		Msg("Sending request to GitHub")
+
 	return t.throttle(req)
 }
 

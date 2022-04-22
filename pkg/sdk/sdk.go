@@ -120,6 +120,7 @@ func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, err
 	)
 
 	if token != nil {
+		logger.Debug().Msg("Found environment variable with GitHub token")
 		return util.NewTokenHTTPClient(ctx, logger, *token), nil
 	}
 
@@ -141,8 +142,11 @@ func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, err
 	)
 
 	if appID != nil && installationID != nil && appPrivKey != nil {
+		logger.Debug().Msg("Found environment variables for GitHub App authentication")
 		return util.NewInstallationHTTPClient(ctx, logger, *appID, *installationID, *appPrivKey)
 	}
+
+	logger.Debug().Msg("Using an unauthenticated GitHub client")
 
 	return http.DefaultClient, nil
 }
