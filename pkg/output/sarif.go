@@ -3,7 +3,7 @@ package output
 import (
 	"strings"
 
-	"github.com/owenrumney/go-sarif/sarif"
+	"github.com/owenrumney/go-sarif/v2/sarif"
 )
 
 func NewSarifReport(report Report) (*sarif.Report, error) {
@@ -12,7 +12,7 @@ func NewSarifReport(report Report) (*sarif.Report, error) {
 		return nil, err
 	}
 
-	run := sarif.NewRun("Reposaur", "https://github.com/reposaur/reposaur")
+	run := sarif.NewRunWithInformationURI("Reposaur", "https://github.com/reposaur/reposaur")
 
 	run.Properties = sarif.Properties{}
 	for k, v := range report.Properties {
@@ -43,17 +43,18 @@ func NewSarifReport(report Report) (*sarif.Report, error) {
 
 	for _, result := range report.Results {
 		if !result.Passed && !result.Skipped {
-			run.AddResult(result.Rule.UID()).
+			run.AddResult(sarif.NewRuleResult(result.Rule.UID()).
 				WithLevel(strings.ToLower(result.Rule.Severity)).
 				WithMessage(sarif.NewTextMessage(result.Rule.Title)).
-				WithLocation(
-					sarif.NewLocationWithPhysicalLocation(
+				WithLocations([]*sarif.Location{
+					sarif.NewLocation().WithPhysicalLocation(
 						sarif.NewPhysicalLocation().
 							WithArtifactLocation(
 								sarif.NewSimpleArtifactLocation("."),
 							),
 					),
-				)
+				}),
+			)
 		}
 	}
 

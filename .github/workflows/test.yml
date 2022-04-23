@@ -34,8 +34,6 @@ jobs:
           - ubuntu
           - macOS
         go:
-          - 15
-          - 16
           - 17
           - 18
     name: "${{ matrix.platform }} | 1.${{ matrix.go }}.x"
