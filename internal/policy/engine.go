@@ -24,11 +24,11 @@ func Load(ctx context.Context, policyPaths []string) (*Engine, error) {
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
 	if err != nil {
-		return nil, &PolicyLoaderError{err}
+		return nil, &ErrPolicyLoad{err}
 	}
 
 	if len(policies.Modules) == 0 {
-		return nil, &NoPoliciesError{policyPaths}
+		return nil, &ErrNoPolicies{policyPaths}
 	}
 
 	modules := policies.ParsedModules()
