@@ -11,12 +11,15 @@ import (
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type Params struct {
 	namespace    string
 	outputFormat string
+	loggerLevel  string
+	loggerFormat string
 	policyPaths  []string
 }
 
@@ -37,7 +40,12 @@ func NewCommand() *cobra.Command {
 			return err
 		}
 
-		rs, err := sdk.New(cmd.Context(), params.policyPaths)
+		logger, err := buildLogger(params.loggerLevel, params.loggerFormat)
+		if err != nil {
+			return err
+		}
+
+		rs, err := sdk.New(cmd.Context(), params.policyPaths, sdk.WithLogger(logger))
 		if err != nil {
 			return err
 		}
@@ -111,6 +119,18 @@ func NewCommand() *cobra.Command {
 		"report output format (one of 'json' and 'sarif')",
 	)
 
+	cmd.Flags().StringVar(
+		&params.loggerFormat,
+		"logger-format", "pretty",
+		"logger format (one of 'pretty' and 'json')",
+	)
+
+	cmd.Flags().StringVarP(
+		&params.loggerLevel,
+		"logger-level", "l", "error",
+		"logger level (one of 'info', 'warn', 'error' or 'debug')",
+	)
+
 	cmd.Flags().StringVarP(
 		&params.namespace,
 		"namespace", "n", "",
@@ -124,6 +144,42 @@ func NewCommand() *cobra.Command {
 	)
 
 	return cmd
+}
+
+func buildLogger(level string, format string) (zerolog.Logger, error) {
+	var logger zerolog.Logger
+
+	switch level {
+	case "info":
+		logger = logger.Level(zerolog.InfoLevel)
+		break
+	case "warn":
+		logger = logger.Level(zerolog.WarnLevel)
+		break
+	case "error":
+		logger = logger.Level(zerolog.ErrorLevel)
+		break
+	case "debug":
+		logger = logger.Level(zerolog.DebugLevel)
+		break
+	default:
+		return logger, fmt.Errorf("unknown logger level '%s'", level)
+	}
+
+	switch format {
+	case "pretty":
+		cw := zerolog.NewConsoleWriter()
+		cw.Out = os.Stderr
+		logger = logger.Output(cw)
+
+	case "json":
+		logger = logger.Output(os.Stderr)
+
+	default:
+		return logger, fmt.Errorf("unknown logger format '%s'", format)
+	}
+
+	return logger, nil
 }
 
 func writeOutput(reports []output.Report, format string, w io.Writer) error {

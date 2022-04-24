@@ -32,6 +32,11 @@ func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL.Host = ghHost
 	req.URL.Scheme = "https"
 
+	t.logger.Debug().
+		Str("method", req.Method).
+		Str("url", req.URL.String()).
+		Msg("Sending request to GitHub")
+
 	return t.throttle(req)
 }
 
@@ -56,9 +61,9 @@ func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
 		Dur("retry after", retryAfter).
 		Logger()
 
-	logger.Info().Msg("Hit secondary rate limit. Waiting before trying...")
+	logger.Info().Msg("Hit secondary rate limit. Waiting before trying")
 	time.Sleep(retryAfter)
-	logger.Info().Msg("Continuing...")
+	logger.Info().Msg("Continuing")
 
 	return t.RoundTrip(req)
 }

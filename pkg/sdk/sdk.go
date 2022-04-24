@@ -44,12 +44,8 @@ type Reposaur struct {
 // The default HTTP client will use the default host `api.github.com`. Can
 // be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
 func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, error) {
-	cw := zerolog.NewConsoleWriter()
-	cw.Out = os.Stderr
-	logger := zerolog.New(cw).With().Timestamp().Logger()
-
 	sdk := &Reposaur{
-		logger: logger,
+		logger: zerolog.New(os.Stderr),
 	}
 
 	for _, opt := range opts {
@@ -124,6 +120,7 @@ func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, err
 	)
 
 	if token != nil {
+		logger.Debug().Msg("Found environment variable with GitHub token")
 		return util.NewTokenHTTPClient(ctx, logger, *token), nil
 	}
 
@@ -145,8 +142,11 @@ func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, err
 	)
 
 	if appID != nil && installationID != nil && appPrivKey != nil {
+		logger.Debug().Msg("Found environment variables for GitHub App authentication")
 		return util.NewInstallationHTTPClient(ctx, logger, *appID, *installationID, *appPrivKey)
 	}
+
+	logger.Debug().Msg("Using an unauthenticated GitHub client")
 
 	return http.DefaultClient, nil
 }
