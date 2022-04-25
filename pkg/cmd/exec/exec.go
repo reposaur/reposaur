@@ -1,4 +1,4 @@
-package reposaur
+package exec
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/reposaur/reposaur/pkg/cmdutil"
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
@@ -18,34 +19,32 @@ import (
 type Params struct {
 	namespace    string
 	outputFormat string
-	loggerLevel  string
-	loggerFormat string
 	policyPaths  []string
 }
 
 var cmd = &cobra.Command{
-	Use:   "reposaur",
+	Use:   "exec",
 	Short: "Executes a set of Rego policies against the data provided",
 	Long:  "Executes a set of Rego policies against the data provided",
 }
 
-func NewCommand() *cobra.Command {
+func NewCommand(f *cmdutil.Factory) *cobra.Command {
 	params := Params{}
 
-	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+	cmd.RunE = func(cmd *cobra.Command, args []string) (err error) {
 		var input interface{}
 
-		err := json.NewDecoder(os.Stdin).Decode(&input)
+		err = json.NewDecoder(os.Stdin).Decode(&input)
 		if err != nil {
 			return err
 		}
 
-		logger, err := buildLogger(params.loggerLevel, params.loggerFormat)
-		if err != nil {
-			return err
-		}
-
-		rs, err := sdk.New(cmd.Context(), params.policyPaths, sdk.WithLogger(logger))
+		rs, err := sdk.New(
+			cmd.Context(),
+			params.policyPaths,
+			sdk.WithLogger(f.Logger),
+			sdk.WithHTTPClient(f.HTTPClient),
+		)
 		if err != nil {
 			return err
 		}
@@ -117,18 +116,6 @@ func NewCommand() *cobra.Command {
 		&params.outputFormat,
 		"format", "f", "sarif",
 		"report output format (one of 'json' and 'sarif')",
-	)
-
-	cmd.Flags().StringVar(
-		&params.loggerFormat,
-		"logger-format", "pretty",
-		"logger format (one of 'pretty' and 'json')",
-	)
-
-	cmd.Flags().StringVarP(
-		&params.loggerLevel,
-		"logger-level", "l", "error",
-		"logger level (one of 'info', 'warn', 'error' or 'debug')",
 	)
 
 	cmd.Flags().StringVarP(
