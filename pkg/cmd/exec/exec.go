@@ -12,7 +12,6 @@ import (
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -131,42 +130,6 @@ func NewCommand(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	return cmd
-}
-
-func buildLogger(level string, format string) (zerolog.Logger, error) {
-	var logger zerolog.Logger
-
-	switch level {
-	case "info":
-		logger = logger.Level(zerolog.InfoLevel)
-		break
-	case "warn":
-		logger = logger.Level(zerolog.WarnLevel)
-		break
-	case "error":
-		logger = logger.Level(zerolog.ErrorLevel)
-		break
-	case "debug":
-		logger = logger.Level(zerolog.DebugLevel)
-		break
-	default:
-		return logger, fmt.Errorf("unknown logger level '%s'", level)
-	}
-
-	switch format {
-	case "pretty":
-		cw := zerolog.NewConsoleWriter()
-		cw.Out = os.Stderr
-		logger = logger.Output(cw)
-
-	case "json":
-		logger = logger.Output(os.Stderr)
-
-	default:
-		return logger, fmt.Errorf("unknown logger format '%s'", format)
-	}
-
-	return logger, nil
 }
 
 func writeOutput(reports []output.Report, format string, w io.Writer) error {
