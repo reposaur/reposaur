@@ -16,11 +16,11 @@ elif uname -a | grep Linux > /dev/null; then
   os="Linux"
 fi
 
-url="https://github.com/$repo/releases/download/$tag/reposaur_${tag#v}_${os}_${arch}.tar.gz"
+url="https://github.com/$repo/releases/download/$tag/rsr_${tag#v}_${os}_${arch}.tar.gz"
 
 echo "OS: $os ($arch)"
 echo "Tag: $tag"
 
-curl -sL "$url" > reposaur.tar.gz
-tar zxf reposaur.tar.gz
-rm reposaur.tar.gz
+curl -sL "$url" > rsr.tar.gz
+tar zxf rsr.tar.gz
+rm rsr.tar.gz
