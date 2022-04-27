@@ -1,0 +1,59 @@
+name: Bug Report
+description: File a bug report
+
+title: "[Bug]: "
+labels: ["bug", "triage"]
+
+assignees:
+  - crqra
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report and improving Reposaur!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what happened
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expectation
+      description: Describe what you expected to have happened
+      placeholder: Tell us what you expected to see!
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What's the version of Reposaur you're running?
+      placeholder: 0.0.0
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please copy and paste any relevant log output.
+        This will be automatically formatted into code, so no need for backticks.
+      render: shell
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: |
+        By submitting this issue, you agree to follow our
+        [Code of Conduct](https://github.com/reposaur/reposaur/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow Reposaur's Code of Conduct
+          required: true
