@@ -46,11 +46,11 @@ $ go install github.com/reposaur/reposaur
 # Usage
 
 ```bash
-$ reposaur --help
+$ rsr --help
 Executes a set of Rego policies against the data provided
 
 Usage:
-  reposaur [flags]
+  rsr [flags]
 
 Flags:
   -f, --format string      report output format (one of 'json' and 'sarif') (default "sarif")
@@ -108,28 +108,28 @@ warn_two_factor_requirement_disabled {
 ## Executing the policies against a single repository
 
 ```shell
-$ gh api /repos/reposaur/reposaur | reposaur
+$ gh api /repos/reposaur/reposaur | rsr
 # { ... }
 ```
 
 ## Executing the policies against every repository in an organization
 
 ```shell
-$ gh api /orgs/reposaur/repos --paginate | jq -s add | reposaur
+$ gh api /orgs/reposaur/repos --paginate | jq -s add | rsr
 # [{ ... }, ...]
 ```
 
 ## Executing the policies against an organization
 
 ```shell
-$ gh api /orgs/reposaur | reposaur
+$ gh api /orgs/reposaur | rsr
 # { ... }
 ```
 
 ## Uploading a SARIF report to GitHub
 
 ```shell
-$ report=$(gh api /repos/reposaur/reposaur | reposaur | gzip | base64)
+$ report=$(gh api /repos/reposaur/reposaur | rsr | gzip | base64)
 
 $ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
     -f sarif="$report" \
@@ -141,7 +141,8 @@ $ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
 
 ```shell
 $ gh api /orgs/reposaur/repos --paginate \
-  | reposaur \
+  | jq -s add \
+  | rsr \
   | jq -r '.[] | @base64' \
   | {
     while read r; do
