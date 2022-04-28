@@ -36,16 +36,11 @@ type Reposaur struct {
 // the built-in functions.
 //
 // If an HTTP client isn't passed as an option, a default
-// client is created. The default client will be authenticated
-// if Reposaur can find the relevant information in environment
-// variables, namely (in this order of preference):
+// client is created. A default (unauthenticated) client is created
+// using `util.GitHubTransport`.
 //
-//   * A client with a token if:
-//     * `GITHUB_TOKEN` or `GH_TOKEN` is present
-//   * A client authenticated as an installation if all the following are present:
-//     * `GITHUB_APP_ID` or `GH_APP_ID`
-//     * `GITHUB_INSTALLATION_ID` or `GH_INSTALLATION_ID`
-//     * `GITHUB_APP_PRIVAATE_KEY` or `GH_APP_PRIVATE_KEY` (Base64 encoded)
+// The util functions available in the `util` package can be used to
+// create authenticated HTTP clients.
 //
 // The default HTTP client will use the default host `api.github.com`. Can
 // be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
@@ -59,12 +54,12 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 	}
 
 	if sdk.httpClient == nil {
-		httpClient, err := createClient(ctx, sdk.logger)
-		if err != nil {
-			return nil, err
+		sdk.httpClient = &http.Client{
+			Transport: util.GitHubTransport{
+				Logger:    sdk.logger,
+				Transport: http.DefaultTransport,
+			},
 		}
-
-		sdk.httpClient = httpClient
 	}
 
 	// TODO: consider not registering builtins globally
@@ -164,42 +159,4 @@ func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
 	}
 
 	return rawResults, nil
-}
-
-func createClient(ctx context.Context, logger zerolog.Logger) (*http.Client, error) {
-	token := util.GetEnv(
-		"GITHUB_TOKEN",
-		"GH_TOKEN",
-	)
-
-	if token != nil {
-		logger.Debug().Msg("Found environment variable with GitHub token")
-		return util.NewTokenHTTPClient(ctx, logger, *token), nil
-	}
-
-	var (
-		appID = util.GetInt64Env(
-			"GITHUB_APP_ID",
-			"GH_APP_ID",
-		)
-
-		installationID = util.GetInt64Env(
-			"GITHUB_INSTALLATION_TOKEN",
-			"GH_INSTALLATION_TOKEN",
-		)
-
-		appPrivKey = util.GetEnv(
-			"GITHUB_APP_PRIVATE_KEY",
-			"GH_APP_PRIVATE_KEY",
-		)
-	)
-
-	if appID != nil && installationID != nil && appPrivKey != nil {
-		logger.Debug().Msg("Found environment variables for GitHub App authentication")
-		return util.NewInstallationHTTPClient(ctx, logger, *appID, *installationID, *appPrivKey)
-	}
-
-	logger.Debug().Msg("Using an unauthenticated GitHub client")
-
-	return http.DefaultClient, nil
 }
