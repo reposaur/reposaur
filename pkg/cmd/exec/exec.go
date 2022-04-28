@@ -1,4 +1,4 @@
-package reposaur
+package exec
 
 import (
 	"encoding/json"
@@ -8,44 +8,42 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/reposaur/reposaur/pkg/cmdutil"
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type Params struct {
 	namespace    string
 	outputFormat string
-	loggerLevel  string
-	loggerFormat string
 	policyPaths  []string
 }
 
 var cmd = &cobra.Command{
-	Use:   "reposaur",
+	Use:   "exec",
 	Short: "Executes a set of Rego policies against the data provided",
 	Long:  "Executes a set of Rego policies against the data provided",
 }
 
-func NewCommand() *cobra.Command {
+func NewCommand(f *cmdutil.Factory) *cobra.Command {
 	params := Params{}
 
-	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+	cmd.RunE = func(cmd *cobra.Command, args []string) (err error) {
 		var input interface{}
 
-		err := json.NewDecoder(os.Stdin).Decode(&input)
+		err = json.NewDecoder(os.Stdin).Decode(&input)
 		if err != nil {
 			return err
 		}
 
-		logger, err := buildLogger(params.loggerLevel, params.loggerFormat)
-		if err != nil {
-			return err
-		}
-
-		rs, err := sdk.New(cmd.Context(), params.policyPaths, sdk.WithLogger(logger))
+		rs, err := sdk.New(
+			cmd.Context(),
+			params.policyPaths,
+			sdk.WithLogger(f.Logger),
+			sdk.WithHTTPClient(f.HTTPClient),
+		)
 		if err != nil {
 			return err
 		}
@@ -119,18 +117,6 @@ func NewCommand() *cobra.Command {
 		"report output format (one of 'json' and 'sarif')",
 	)
 
-	cmd.Flags().StringVar(
-		&params.loggerFormat,
-		"logger-format", "pretty",
-		"logger format (one of 'pretty' and 'json')",
-	)
-
-	cmd.Flags().StringVarP(
-		&params.loggerLevel,
-		"logger-level", "l", "error",
-		"logger level (one of 'info', 'warn', 'error' or 'debug')",
-	)
-
 	cmd.Flags().StringVarP(
 		&params.namespace,
 		"namespace", "n", "",
@@ -146,42 +132,6 @@ func NewCommand() *cobra.Command {
 	return cmd
 }
 
-func buildLogger(level string, format string) (zerolog.Logger, error) {
-	var logger zerolog.Logger
-
-	switch level {
-	case "info":
-		logger = logger.Level(zerolog.InfoLevel)
-		break
-	case "warn":
-		logger = logger.Level(zerolog.WarnLevel)
-		break
-	case "error":
-		logger = logger.Level(zerolog.ErrorLevel)
-		break
-	case "debug":
-		logger = logger.Level(zerolog.DebugLevel)
-		break
-	default:
-		return logger, fmt.Errorf("unknown logger level '%s'", level)
-	}
-
-	switch format {
-	case "pretty":
-		cw := zerolog.NewConsoleWriter()
-		cw.Out = os.Stderr
-		logger = logger.Output(cw)
-
-	case "json":
-		logger = logger.Output(os.Stderr)
-
-	default:
-		return logger, fmt.Errorf("unknown logger format '%s'", format)
-	}
-
-	return logger, nil
-}
-
 func writeOutput(reports []output.Report, format string, w io.Writer) error {
 	format = strings.ToLower(format)
 
@@ -189,11 +139,11 @@ func writeOutput(reports []output.Report, format string, w io.Writer) error {
 		return fmt.Errorf("unknown output format '%s'", format)
 	}
 
-	var x []interface{}
+	var data []interface{}
 
 	for _, r := range reports {
 		if format == "json" {
-			x = append(x, r)
+			data = append(data, r)
 			continue
 		}
 
@@ -202,15 +152,15 @@ func writeOutput(reports []output.Report, format string, w io.Writer) error {
 			return err
 		}
 
-		x = append(x, sarifReport)
+		data = append(data, sarifReport)
 	}
 
 	dec := json.NewEncoder(w)
 	dec.SetIndent("", "  ")
 
-	if len(x) == 1 {
-		return dec.Encode(x[0])
+	if len(data) == 1 {
+		return dec.Encode(data[0])
 	}
 
-	return dec.Encode(x)
+	return dec.Encode(data)
 }

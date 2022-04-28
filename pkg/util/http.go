@@ -17,12 +17,12 @@ const (
 	retryAfterHeader  = "Retry-After"
 )
 
-type githubTransport struct {
-	logger    zerolog.Logger
-	transport http.RoundTripper
+type GitHubTransport struct {
+	Logger    zerolog.Logger
+	Transport http.RoundTripper
 }
 
-func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t GitHubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ghHost := defaultGitHubHost
 
 	if host := GetEnv("GITHUB_HOST", "GH_HOST"); host != nil {
@@ -32,7 +32,7 @@ func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL.Host = ghHost
 	req.URL.Scheme = "https"
 
-	t.logger.Debug().
+	t.Logger.Debug().
 		Str("method", req.Method).
 		Str("url", req.URL.String()).
 		Msg("Sending request to GitHub")
@@ -40,8 +40,8 @@ func (t githubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.throttle(req)
 }
 
-func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
-	resp, err := t.transport.RoundTrip(req)
+func (t *GitHubTransport) throttle(req *http.Request) (*http.Response, error) {
+	resp, err := t.Transport.RoundTrip(req)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	logger := t.logger.With().
+	logger := t.Logger.With().
 		Str("path", req.URL.Path).
 		Dur("retry after", retryAfter).
 		Logger()
@@ -71,9 +71,9 @@ func (t *githubTransport) throttle(req *http.Request) (*http.Response, error) {
 // NewTokenHTTPClient creates an http.Client with a
 // oauth2.StaticTokenSource using the provided token.
 func NewTokenHTTPClient(ctx context.Context, logger zerolog.Logger, token string) *http.Client {
-	ghTransport := &githubTransport{
-		logger:    logger,
-		transport: http.DefaultTransport,
+	ghTransport := &GitHubTransport{
+		Logger:    logger,
+		Transport: http.DefaultTransport,
 	}
 
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
@@ -106,9 +106,9 @@ func NewInstallationHTTPClient(ctx context.Context, logger zerolog.Logger, appID
 		return nil, err
 	}
 
-	ghTransport := githubTransport{
-		logger:    logger,
-		transport: http.DefaultTransport,
+	ghTransport := GitHubTransport{
+		Logger:    logger,
+		Transport: http.DefaultTransport,
 	}
 
 	installationTransport, err := ghinstallation.New(ghTransport, appID, installationID, privKey)

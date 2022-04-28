@@ -3,7 +3,19 @@ before:
     - go mod tidy
     - go vet ./...
 builds:
-  - env:
+  - id: rsr
+    binary: rsr
+    main: ./cmd/rsr/rsr.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+  - id: reposaur
+    binary: reposaur
+    main: ./cmd/rsr/rsr.go
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
