@@ -5,10 +5,11 @@ go 1.18
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
-	github.com/open-policy-agent/opa v0.39.1-0.20220427120137-654b245bb0cf
+	github.com/open-policy-agent/opa v0.40.0
 	github.com/owenrumney/go-sarif/v2 v2.1.1
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.4.0
+	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 )
 
@@ -23,7 +24,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
