@@ -139,11 +139,11 @@ func writeOutput(reports []output.Report, format string, w io.Writer) error {
 		return fmt.Errorf("unknown output format '%s'", format)
 	}
 
-	var x []interface{}
+	var data []interface{}
 
 	for _, r := range reports {
 		if format == "json" {
-			x = append(x, r)
+			data = append(data, r)
 			continue
 		}
 
@@ -152,15 +152,15 @@ func writeOutput(reports []output.Report, format string, w io.Writer) error {
 			return err
 		}
 
-		x = append(x, sarifReport)
+		data = append(data, sarifReport)
 	}
 
 	dec := json.NewEncoder(w)
 	dec.SetIndent("", "  ")
 
-	if len(x) == 1 {
-		return dec.Encode(x[0])
+	if len(data) == 1 {
+		return dec.Encode(data[0])
 	}
 
-	return dec.Encode(x)
+	return dec.Encode(data)
 }
