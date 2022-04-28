@@ -14,12 +14,15 @@ import (
 	"github.com/reposaur/reposaur/pkg/output"
 )
 
+type Option func(*Engine)
+
 type Engine struct {
-	modules  map[string]*ast.Module
-	compiler *ast.Compiler
+	modules       map[string]*ast.Module
+	compiler      *ast.Compiler
+	enableTracing bool
 }
 
-func Load(ctx context.Context, policyPaths []string) (*Engine, error) {
+func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
@@ -40,12 +43,24 @@ func Load(ctx context.Context, policyPaths []string) (*Engine, error) {
 		return nil, fmt.Errorf("compiler: %w", compiler.Errors)
 	}
 
-	engine := Engine{
+	engine := &Engine{
 		modules:  modules,
 		compiler: compiler,
 	}
 
-	return &engine, nil
+	for _, opt := range opts {
+		opt(engine)
+	}
+
+	return engine, nil
+}
+
+// WithTracingEnabled enables or disables policy
+// execution tracing.
+func WithTracingEnabled(enabled bool) Option {
+	return func(e *Engine) {
+		e.enableTracing = enabled
+	}
 }
 
 // Namespaces returns all of the namespaces in the engine.
@@ -175,6 +190,7 @@ func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
 		rego.Query(query),
 		rego.Input(input),
 		rego.Compiler(e.compiler),
+		rego.Trace(e.enableTracing),
 		rego.StrictBuiltinErrors(true),
 		rego.PrintHook(topdown.NewPrintHook(os.Stderr)),
 	)
