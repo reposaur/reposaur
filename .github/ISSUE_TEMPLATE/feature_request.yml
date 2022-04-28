@@ -1,0 +1,48 @@
+name: Feature Request
+description: Suggest a new idea or feature to add to Reposaur
+
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest new ideas and features,
+        improving Reposaur!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What would you like to see improved?
+      description: |
+        Is there something challenging or frustrating about Reposaur
+        that you're trying to improve? How would this improvement make your
+        experience better?
+    validations:
+      required: true
+
+  - type: textarea
+    id: ideal-solution
+    attributes:
+      label: What would be the ideal solution?
+    validations:
+      required: true
+
+  - type: textarea
+    id: good-solution
+    attributes:
+      label: What would be a \"good enough\" solution?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: |
+        By submitting this issue, you agree to follow our
+        [Code of Conduct](https://github.com/reposaur/reposaur/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow Reposaur's Code of Conduct
+          required: true
