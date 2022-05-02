@@ -1,10 +1,15 @@
 package sdk
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/open-policy-agent/opa/tester"
+	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/builtins"
 	"github.com/reposaur/reposaur/internal/policy"
 	"github.com/reposaur/reposaur/pkg/output"
@@ -20,9 +25,10 @@ type Option func(*Reposaur)
 // started with several options that control configuration, logging and
 // the client to GitHub.
 type Reposaur struct {
-	logger     zerolog.Logger
-	engine     *policy.Engine
-	httpClient *http.Client
+	logger        zerolog.Logger
+	engine        *policy.Engine
+	httpClient    *http.Client
+	enableTracing bool
 }
 
 // New returns a new Reposaur instance, loading and
@@ -56,11 +62,13 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 		}
 	}
 
+	// TODO: consider not registering builtins globally
+	// to avoid unexpected side-effects by clients
 	builtins.RegisterBuiltins(sdk.httpClient)
 
 	var err error
 
-	sdk.engine, err = policy.Load(ctx, policyPaths)
+	sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +88,14 @@ func WithLogger(logger zerolog.Logger) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(sdk *Reposaur) {
 		sdk.httpClient = client
+	}
+}
+
+// WithTracingEnabled enables or disables policy
+// execution tracing.
+func WithTracingEnabled(enabled bool) Option {
+	return func(sdk *Reposaur) {
+		sdk.enableTracing = enabled
 	}
 }
 
@@ -106,4 +122,41 @@ func (sdk Reposaur) Check(ctx context.Context, namespace string, data interface{
 	}
 
 	return report, nil
+}
+
+func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
+	runner := tester.NewRunner().
+		EnableTracing(sdk.enableTracing).
+		CapturePrintOutput(true).
+		SetCompiler(sdk.engine.Compiler()).
+		SetModules(sdk.engine.Modules())
+
+	ch, err := runner.RunTests(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("running tests: %w", err)
+	}
+
+	var rawResults []*tester.Result
+	for result := range ch {
+		if result.Error != nil {
+			return nil, fmt.Errorf("run test: %w", result.Error)
+		}
+
+		rawResults = append(rawResults, result)
+		buf := new(bytes.Buffer)
+		topdown.PrettyTrace(buf, result.Trace)
+
+		var traces []string
+		for _, line := range strings.Split(buf.String(), "\n") {
+			if len(line) > 0 {
+				traces = append(traces, line)
+			}
+		}
+
+		for _, t := range traces {
+			fmt.Println(t)
+		}
+	}
+
+	return rawResults, nil
 }
