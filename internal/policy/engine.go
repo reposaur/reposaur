@@ -19,6 +19,15 @@ type Engine struct {
 	compiler *ast.Compiler
 }
 
+func New() *Engine {
+	engine := Engine{
+		modules:  map[string]*ast.Module{},
+		compiler: ast.NewCompiler().WithEnablePrintStatements(true),
+	}
+
+	return &engine
+}
+
 func Load(ctx context.Context, policyPaths []string) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
@@ -73,6 +82,27 @@ func (e *Engine) Compiler() *ast.Compiler {
 // Modules returns the modules from the loaded policies.
 func (e *Engine) Modules() map[string]*ast.Module {
 	return e.modules
+}
+
+func (e *Engine) LoadPolicy(filename, policy string) error {
+	module, err := ast.ParseModuleWithOpts(filename, policy, ast.ParserOptions{
+		ProcessAnnotation: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	e.compiler.Compile(map[string]*ast.Module{
+		filename: module,
+	})
+
+	if e.compiler.Failed() {
+		return fmt.Errorf("compiler: %w", e.compiler.Errors)
+	}
+
+	e.modules[filename] = module
+
+	return nil
 }
 
 func (e *Engine) Check(ctx context.Context, namespace string, input interface{}) (output.Report, error) {

@@ -60,9 +60,13 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 
 	var err error
 
-	sdk.engine, err = policy.Load(ctx, policyPaths)
-	if err != nil {
-		return nil, err
+	if len(policyPaths) == 0 {
+		sdk.engine = policy.New()
+	} else {
+		sdk.engine, err = policy.Load(ctx, policyPaths)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return sdk, nil
