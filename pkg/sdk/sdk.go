@@ -44,8 +44,8 @@ type Reposaur struct {
 //
 // The default HTTP client will use the default host `api.github.com`. Can
 // be customized using the `GITHUB_HOST` or `GH_HOST` environment variables.
-func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, error) {
-	sdk := &Reposaur{
+func New(ctx context.Context, policyPaths []string, opts ...Option) (sdk *Reposaur, err error) {
+	sdk = &Reposaur{
 		logger: zerolog.New(os.Stderr),
 	}
 
@@ -66,16 +66,18 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 	// to avoid unexpected side-effects by clients
 	builtins.RegisterBuiltins(sdk.httpClient)
 
-	var err error
+	engineOpts := []policy.EngineOption{
+		policy.WithTracingEnabled(sdk.enableTracing),
+	}
 
 	if len(policyPaths) == 0 {
-		sdk.engine = policy.New()
+		sdk.engine = policy.NewEngine(engineOpts...)
 	} else {
-	  sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
+		sdk.engine, err = policy.NewEngineWithPolicies(ctx, policyPaths, engineOpts...)
 		if err != nil {
 			return nil, err
-    } 
-  }
+		}
+	}
 
 	return sdk, nil
 }

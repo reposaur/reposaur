@@ -14,7 +14,7 @@ import (
 	"github.com/reposaur/reposaur/pkg/output"
 )
 
-type Option func(*Engine)
+type EngineOption func(*Engine)
 
 type Engine struct {
 	modules       map[string]*ast.Module
@@ -22,7 +22,7 @@ type Engine struct {
 	enableTracing bool
 }
 
-func NewEngine(opts ...Option) *Engine {
+func NewEngine(opts ...EngineOption) *Engine {
 	engine := &Engine{
 		modules:  map[string]*ast.Module{},
 		compiler: ast.NewCompiler().WithEnablePrintStatements(true),
@@ -35,7 +35,7 @@ func NewEngine(opts ...Option) *Engine {
 	return engine
 }
 
-func NewEngineWithPolicies(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
+func NewEngineWithPolicies(ctx context.Context, policyPaths []string, opts ...EngineOption) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
@@ -70,7 +70,7 @@ func NewEngineWithPolicies(ctx context.Context, policyPaths []string, opts ...Op
 
 // WithTracingEnabled enables or disables policy
 // execution tracing.
-func WithTracingEnabled(enabled bool) Option {
+func WithTracingEnabled(enabled bool) EngineOption {
 	return func(e *Engine) {
 		e.enableTracing = enabled
 	}
