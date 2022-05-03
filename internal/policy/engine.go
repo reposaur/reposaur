@@ -22,20 +22,20 @@ type Engine struct {
 	enableTracing bool
 }
 
-func New(opts ...Option) *Engine {
+func NewEngine(opts ...Option) *Engine {
 	engine := &Engine{
 		modules:  map[string]*ast.Module{},
 		compiler: ast.NewCompiler().WithEnablePrintStatements(true),
 	}
 
-  for _, opt := range opts {
+	for _, opt := range opts {
 		opt(engine)
 	}
 
 	return engine
 }
 
-func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
+func NewEngineWithPolicies(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
