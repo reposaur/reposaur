@@ -22,7 +22,7 @@ stable release.
 * [x] Extendable using the Go SDK
 * [x] Output reports in JSON and SARIF formats
 * [x] Use in GitHub Actions ([see more](#use-in-github-actions))
-* [ ] Policies unit testing (possible with `opa test` if not using built-in functions) (see reposaur/reposaur#1)
+* [x] Policies unit testing ([see more](#testing-policies))
 * [ ] Deploy as a GitHub App (possible but no official guide yet) (see reposaur/reposaur#2)
 
 # Installation
@@ -161,6 +161,33 @@ $ gh api /orgs/reposaur/repos --paginate \
         -f ref="refs/heads/$branch"
     done
   }
+```
+
+## Unit Testing
+
+_./policy/organization_test.go_
+``` rego
+package organization
+
+test_two_factor_requirement_fails_when_disabled {
+	warn_two_factor_requirement_disabled with input.two_factor_requirement_enabled as false
+}
+
+test_two_factor_requirement_passes_when_enabled {
+	not warn_two_factor_requirement_disabled with input.two_factor_requirement_enabled as true
+}
+```
+
+Run the tests:
+
+``` shell
+$ rsr test
+```
+
+Run the tests with tracing enabled:
+
+``` shell
+$ rsr test --trace
 ```
 
 # Policies
@@ -353,7 +380,7 @@ steps:
   - name: Setup Reposaur
     uses: reposaur/reposaur@main
 
-  - run: reposaur --help
+  - run: rsr --help
 ```
 
 # Contributing
