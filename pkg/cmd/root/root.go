@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/reposaur/reposaur/pkg/cmd/exec"
+	"github.com/reposaur/reposaur/pkg/cmd/test"
 	"github.com/reposaur/reposaur/pkg/cmdutil"
 	"github.com/reposaur/reposaur/pkg/util"
 	"github.com/rs/zerolog"
@@ -56,6 +57,7 @@ func NewCommand(f *cmdutil.Factory) *cobra.Command {
 
 	// Sub-commands
 	cmd.AddCommand(execCmd)
+	cmd.AddCommand(test.NewCommand(f))
 
 	// Common flags
 	cmd.PersistentFlags().String(
