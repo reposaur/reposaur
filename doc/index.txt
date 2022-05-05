@@ -1,0 +1,12 @@
+# manuals included in this project:
+rsr(1)              rsr.1.ronn
+
+# external manuals
+opa(1)              https://www.openpolicyagent.org/docs/latest/
+rego-language(1)    https://www.openpolicyagent.org/docs/latest/policy-language/
+rego-reference(1)   https://www.openpolicyagent.org/docs/latest/policy-reference/
+
+# other URLs
+src                 https://github.com/reposaur/reposaur
+playground          https://play.reposaur.com
+bug-report          https://github.com/reposaur/reposaur/issues/new?assignees=&labels=bug%2Ctriage&template=bug_report.yml&title=%5BBug%5D%3A+

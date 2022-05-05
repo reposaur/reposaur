@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>rsr(1) - security &amp;amp; compliance for development platforms</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#OPTIONS">OPTIONS</a>
+    <a href="#POLICIES">POLICIES</a>
+    <a href="#EXIT-STATUS">EXIT STATUS</a>
+    <a href="#EXAMPLES">EXAMPLES</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+    <a href="#BUGS">BUGS</a>
+    <a href="#AUTHORS">AUTHORS</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>rsr(1)</li>
+    <li class='tc'>Reposaur Manual</li>
+    <li class='tr'>rsr(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>rsr</code> - <span class="man-whatis">security &amp; compliance for development platforms</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><code>rsr</code> [<code>--exec</code>] [<code>-p</code> <var>POLICY_PATH</var>] [<code>-n</code> <var>NAMESPACE</var>] [<code>-o</code> <var>OUTPUT</var>] [INPUT]<br />
+<code>rsr</code> <code>--test</code> [<code>-o</code> <var>OUTPUT</var>]<br /></p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p>Reposaur (<code>rsr</code>) executes Rego <a href="#POLICIES" title="POLICIES" data-bare-link="true">policies</a> in <var>POLICY_PATH</var> against <var>INPUT</var> and outputs SARIF
+reports to <var>OUTPUT</var>. The <var>INPUT</var> argument is optional and defaults to standard input.
+Only a single <var>INPUT</var> file may be specified. If <code>-o</code> is not specified, <var>OUTPUT</var> defaults
+to standard output.</p>
+
+<p>See also <a class="man-ref" href="https://www.openpolicyagent.org/docs/latest/policy-language/">rego-language<span class="s">(1)</span></a> and <a class="man-ref" href="https://www.openpolicyagent.org/docs/latest/policy-reference/">rego-reference<span class="s">(1)</span></a>.</p>
+
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<dl>
+<dt><code>-p</code>, <code>--policy</code>=<var>POLICY_PATH</var></dt><dd><p>Execute or test the <a href="#POLICIES" title="POLICIES" data-bare-link="true">policies</a> at <var>POLICY_PATH</var>. The path can be either a
+file or directory. Directories are loaded recursively. Defaults to current
+working directory.</p></dd>
+<dt><code>-T</code>, <code>--trace</code></dt><dd><p>Enables policy execution tracing.</p></dd>
+<dt><code>-v</code>, <code>--verbose</code></dt><dd><p>Print debug logs to standard error output.</p></dd>
+<dt><code>-V</code>, <code>--version</code></dt><dd><p>Print the version and exit.</p></dd>
+<dt><code>-h</code>, <code>--help</code></dt><dd><p>Print usage and exit.</p></dd>
+</dl>
+
+
+<h3 id="Execution-options">Execution options</h3>
+
+<dl>
+<dt><code>-e</code>, <code>--exec</code></dt><dd><p>Executes policies. Can't be used with <code>-t</code>/<code>--test</code>.</p></dd>
+<dt><code>-o</code>, <code>--output</code>=<var>OUTPUT</var></dt><dd><p>Write reports to <var>OUTPUT</var> instead of standard output.
+If <var>OUTPUT</var> already exists it will be overwritten.</p></dd>
+<dt><code>-n</code>, <code>--namespace</code>=<var>NAMESPACE</var></dt><dd><p>The name of the policy package (see <a href="#POLICIES" title="POLICIES" data-bare-link="true">POLICIES</a>) that will be executed. <a href="#Namespaces" title="Namespaces" data-bare-link="true">Namespaces</a>
+are detected automatically for <em>repositories</em>, <em>organizations</em>, <em>users</em>, <em>issues</em> and
+<em>pull requests</em>.</p></dd>
+</dl>
+
+
+<h3 id="Test-options">Test options</h3>
+
+<dl>
+<dt><code>-t</code>, <code>--test</code></dt><dd>Test policies. Can't be used with <code>-e</code>/<code>--exec</code>.</dd>
+</dl>
+
+
+<h2 id="POLICIES">POLICIES</h2>
+
+<p>Policies are written using the Rego query language.</p>
+
+<h3 id="Namespaces">Namespaces</h3>
+
+<p>Policy modules start with a package definition. The package's name is
+what we call a <em>namespace</em>.</p>
+
+<pre><code>package &lt;NAMESPACE>
+</code></pre>
+
+<p>Namespaces are used to tell Reposaur which policies it should apply to
+which data.</p>
+
+<p>The natively supported namespaces are:</p>
+
+<dl>
+<dt><code>repository</code></dt><dd><p>A GitHub Repository.</p></dd>
+<dt><code>pull_request</code></dt><dd><p>A GitHub Pull Request.</p></dd>
+<dt class="flush"><code>issue</code></dt><dd><p>A GitHub Issue.</p></dd>
+<dt class="flush"><code>user</code></dt><dd><p>A GitHub User.</p></dd>
+<dt><code>organization</code></dt><dd><p>A GitHub Organization.</p></dd>
+</dl>
+
+
+<p>Custom namespaces can be specified with the <code>-n</code>/<code>--namespace</code> flag.</p>
+
+<h3 id="Rules">Rules</h3>
+
+<p>Only rules with specific prefixes are considered when executing policies:</p>
+
+<dl>
+<dt><code>violation_</code>, <code>fail_</code>, <code>error_</code></dt><dd><p>Rules that <em>must</em> not fail and pose high security issues. Correspond to <code>error</code> in SARIF
+reports and have <code>CRITICAL</code> severity level.</p></dd>
+<dt><code>warning_</code>, <code>warn_</code></dt><dd><p>Rules that <em>should</em> not fail and pose medium security issues. Correspond to <code>warning</code> in SARIF
+reports and have <code>MEDIUM</code> severity level.</p></dd>
+<dt><code>note_</code>, <code>info_</code></dt><dd><p>Rules that <em>can</em> fail and don't pose a security issue. Correspond to <code>note</code> in SARIF
+reports and have <code>LOW</code> severity level.</p></dd>
+</dl>
+
+
+<p>Additionally, there is a special rule to skip rules in certain cases:</p>
+
+<pre><code># Skip repositories from the "note_empty_description"
+# rule if they're not in the InnerSource program
+skip[rules] {
+    count({t | input.topics[t] == "innersource"}) == 0
+    rules := ["empty_description"]
+}
+</code></pre>
+
+<p>Note that to skip a rule we don't have to specify it's prefix.</p>
+
+<h3 id="Built-in-functions">Built-in functions</h3>
+
+<p>Rego comes with a lot of handy built-in functions. Reposaur extends with the following:</p>
+
+<dl>
+<dt><code>github.request(&lt;PATH>, &lt;DATA>)</code></dt><dd><p>Perform an HTTP request to the GitHub REST API. Supports the same syntax as
+Octokit.js.</p>
+
+<pre><code>resp := github.request("GET /repos/{owner}/{repo}", {
+  "owner": "reposaur",
+  "repo": "reposaur",
+})
+
+resp.status == 200 # true
+resp.body.name == "reposaur" # true
+</code></pre></dd>
+<dt><code>github.graphql(&lt;QUERY>, &lt;VARIABLES>)</code></dt><dd><p>Perform an HTTP request to the GitHub GraphQL API.</p>
+
+<pre><code>resp := github.graphql(
+  `
+    query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) {
+        name
+      }
+    }
+  `,
+  {
+    "owner": "reposaur",
+    "name": "reposaur",
+  }
+)
+
+resp.status == 200 # true
+resp.body.data.repository.name == "reposaur" # true
+</code></pre></dd>
+</dl>
+
+
+<h3 id="Metadata">Metadata</h3>
+
+<p>Rules in policies can have metadata fields to enhance them with relevant information.
+This section always starts with a <code># METADATA</code> header.</p>
+
+<dl>
+<dt class="flush"><code>title</code></dt><dd><p>A short, single-sentence description of the rule.</p></dd>
+<dt><code>description:</code>
+A longer description of the rule, possibly including how-to fix
+any issues and references. Supports Markdown.</dt><dd><p></p></dd>
+<dt><code>common.tags</code></dt><dd><p>List of tags that can further help identifying the rule subject or
+group rules by common topics.</p></dd>
+<dt><code>common.security-severity</code></dt><dd><p>A number between 0 and 10 that expresses the security severity of the rule.
+Over 9.0 is <code>CRITICAL</code>, 7.0 to 8.9 is <code>HIGH</code>, 4.0 to 6.9 is <code>MEDIUM</code> and
+3.9 or less is <code>LOW</code>.</p></dd>
+</dl>
+
+
+<p>Example:</p>
+
+<pre><code># METADATA
+# title: Repository description is empty
+# description: &gt;
+#   The repository's description is empty, making it harder
+#   for organization members and auditors to understand the
+#   scope of the project.
+#
+#   Fix by adding a description to the repository in the homepage.
+#
+#   See also [InnerSource Guidelines](#)
+# common:
+#   tags: [best-practices, innersource]
+#   security-severity: 0
+note_empty_description {
+    input.description == ""
+}
+</code></pre>
+
+<h3 id="Tests">Tests</h3>
+
+<p>Test modules must have a <code>_test.rego</code> extension and rules must have the <code>test_</code>
+prefix.</p>
+
+<p>For the policy:</p>
+
+<dl>
+<dt><code>innersource.rego</code>:</dt><dd><p></p>
+
+<pre><code>package repository
+
+note_empty_description {
+    input.description == ""
+}
+</code></pre></dd>
+</dl>
+
+
+<p>We could write the following test:</p>
+
+<dl>
+<dt><code>innersource_test.rego</code>:</dt><dd><p></p>
+
+<pre><code>package repository
+
+test_empty_description_should_fail {
+    note_empty_description with input.description as ""
+}
+
+test_with_description_should_pass {
+    not note_empty_description with input.description as "some description"
+}
+</code></pre></dd>
+</dl>
+
+
+<p>Running these tests should result in success:</p>
+
+<pre><code>$ rsr -t
+0:00AM INF data.repository.test_empty_description_should_fail: PASS (915µs)
+0:00AM INF data.repository.test_with_description_should_pass: PASS (54.125µs)
+0:00AM INF done failed=0 passed=2 timeEllapsed=1.9335 total=2
+</code></pre>
+
+<h2 id="EXIT-STATUS">EXIT STATUS</h2>
+
+<p>When executing policies, <code>rsr</code> will exit 0 even if there are <a href="#Rules" title="Rules" data-bare-link="true">rules</a> failing.</p>
+
+<p>When running policy tests, <code>rsr</code> will exit 1 if there are tests failing and
+exit 0 otherwise.</p>
+
+<p>If an error occurs during policy compilation or execution, will exit 1. Note that
+reports might have already been produced and written to <var>OUTPUT</var>.</p>
+
+<h2 id="EXAMPLES">EXAMPLES</h2>
+
+<p>Streaming data from a file:</p>
+
+<pre><code>$ cat repos.json | rsr
+
+$ rsr repos.json
+</code></pre>
+
+<p>Streaming data from GitHub API:</p>
+
+<pre><code>$ gh api /orgs/reposaur/repos | rsr
+
+$ curl https://api.github.com/orgs/reposaur/repos | rsr
+</code></pre>
+
+<p>Outputing to a file instead of standard output:</p>
+
+<pre><code>$ cat repos.json | rsr -o out
+
+$ cat repos.json | rsr &gt; out
+</code></pre>
+
+<p>Piping to other tools:</p>
+
+<pre><code>$ cat repos.json | rsr | jq -s length
+</code></pre>
+
+<p>Running policy tests:</p>
+
+<pre><code>$ rsr --test
+</code></pre>
+
+<p>Uploading a report to GitHub Code Scanning:</p>
+
+<pre><code>$ full_name="reposaur/reposaur"
+
+$ branch="main"
+
+$ commit_sha=$(gh api "/repos/$full_name/branches/$branch" -q '.commit.sha')
+
+$ report=$(gh api "/repos/$full_name" | rsr | gzip | base64)
+
+$ gh api "/repos/$full_name/code-scanning/sarifs" \
+    -f sarif="$report" \
+    -f commit_sha="$commit_sha" \
+    -f ref="$branch"
+</code></pre>
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><a href="https://github.com/reposaur/reposaur">repository</a>, <a href="https://play.reposaur.com">playground</a>, <a class="man-ref" href="https://www.openpolicyagent.org/docs/latest/">opa<span class="s">(1)</span></a>, <a class="man-ref" href="https://www.openpolicyagent.org/docs/latest/policy-language/">rego-language<span class="s">(1)</span></a>, <a class="man-ref" href="https://www.openpolicyagent.org/docs/latest/policy-reference/">rego-reference<span class="s">(1)</span></a></p>
+
+<h2 id="BUGS">BUGS</h2>
+
+<p>If you find any issue using Reposaur, please fill a <a href="https://github.com/reposaur/reposaur/issues/new?assignees=&amp;labels=bug%2Ctriage&amp;template=bug_report.yml&amp;title=%5BBug%5D%3A+">bug report</a>. We appreciate it!</p>
+
+<h2 id="AUTHORS">AUTHORS</h2>
+
+<p>Joao Cerqueira <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#111;&#x73;&#x73;&#64;&#99;&#x65;&#x72;&#x71;&#x75;&#x65;&#x69;&#114;&#x61;&#46;&#105;&#111;" data-bare-link="true">&#111;&#115;&#x73;&#x40;&#99;&#101;&#114;&#113;&#117;&#x65;&#105;&#x72;&#x61;&#46;&#105;&#x6f;</a></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>Reposaur</li>
+    <li class='tc'>May 2022</li>
+    <li class='tr'>rsr(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
