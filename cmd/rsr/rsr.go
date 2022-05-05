@@ -243,10 +243,13 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 		for report := range reportsCh {
 			sarif, err := output.NewSarifReport(report)
 			if err != nil {
-				panic(err)
+				logger.Fatal().Err(err).Send()
 			}
 
-			enc.Encode(sarif)
+			if err := enc.Encode(sarif); err != nil {
+				logger.Fatal().Err(err).Send()
+			}
+
 			reportsWg.Done()
 		}
 	}()
