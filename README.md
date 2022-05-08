@@ -36,7 +36,7 @@ $ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh |
 #### Using Go
 
 ```shell
-$ go install github.com/reposaur/reposaur
+$ go install github.com/reposaur/reposaur/cmd/rsr@latest
 ```
 
 # Guides
@@ -351,6 +351,48 @@ Forbidden errors are treated in a special manner and will cause
 policy execution to halt. Usually these errors happen when authentication is
 required, a token is invalid or doesn't have sufficient permissions or rate limit
 has been exceeded.
+
+## Unit Testing
+
+Test modules must have a `_test.rego` extension and rules must have the `test_`
+prefix.
+
+For the policy:
+
+- `innersource.rego`:
+
+```rego
+package repository
+
+note_empty_description {
+    input.description == ""
+}
+```
+
+We could write the following test:
+
+- `innersource_test.rego`:
+
+```rego
+package repository
+
+test_empty_description_should_fail {
+    note_empty_description with input.description as ""
+}
+
+test_with_description_should_pass {
+    not note_empty_description with input.description as "some description"
+}
+```
+
+Running these tests should result in success:
+
+```bash
+$ rsr test
+0:00AM INF data.repository.test_empty_description_should_fail: PASS (915µs)
+0:00AM INF data.repository.test_with_description_should_pass: PASS (54.125µs)
+0:00AM INF done failed=0 passed=2 timeEllapsed=1.9335 total=2
+```
 
 # Use in GitHub Actions
 
