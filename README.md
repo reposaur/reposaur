@@ -17,13 +17,13 @@ stable release.
 
 # Features
 
-* [x] Write custom policies using [Rego][rego] policy language ([see more](#policies))
-* [x] Simple, composable and easy-to-use CLI ([see more](#examples))
-* [x] Extendable using the Go SDK
-* [x] Output reports in JSON and SARIF formats
-* [x] Use in GitHub Actions ([see more](#use-in-github-actions))
-* [x] Policies unit testing (possible with `opa test` if not using built-in functions) (see reposaur/reposaur#1)
-* [ ] Deploy as a GitHub App (possible but no official guide yet) (see reposaur/reposaur#2)
+- [x] Write custom policies using [Rego][rego] policy language ([see more](#policies))
+- [x] Simple, composable and easy-to-use CLI ([see more](#examples))
+- [x] Extendable using the Go SDK
+- [x] Output reports in JSON and SARIF formats
+- [x] Use in GitHub Actions ([see more](#use-in-github-actions))
+- [x] Policies unit testing (possible with `opa test` if not using built-in functions) (see reposaur/reposaur#1)
+- [ ] Deploy as a GitHub App (possible but no official guide yet) (see reposaur/reposaur#2)
 
 # Installation
 
@@ -47,25 +47,32 @@ $ go install github.com/reposaur/reposaur
 
 ```bash
 $ rsr --help
-Executes a set of Rego policies against the data provided
+Reposaur - security & compliance for GitHub metadata
 
 Usage:
-  rsr [flags]
+  rsr [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  exec        Executes policies against INPUT data
+  help        Help about any command
+  test        Runs the tests available in POLICY_PATH
 
 Flags:
-  -f, --format string      report output format (one of 'json' and 'sarif') (default "sarif")
-  -h, --help               help for reposaur
-  -n, --namespace string   use this namespace
-  -p, --policy strings     set the path to a policy or directory of policies (default [./policy])
+  -h, --help      help for rsr
+  -v, --verbose   print debug logs
+
+Use "rsr [command] --help" for more information about a command.
 ```
 
 # Examples
 
 The following examples assume we're running Reposaur in a directory
-with the following policies inside `./policy` directory. If you're looking 
+with the following policies inside `./policy` directory. If you're looking
 for more examples of policies check the [reposaur/policy](https://github.com/reposaur/policy) repository.
 
 _./policy/repository.go_
+
 ```rego
 package repository
 
@@ -82,6 +89,7 @@ warn_description_empty {
 ```
 
 _./policy/pull_request.go_
+
 ```rego
 package pull_request
 
@@ -94,6 +102,7 @@ warn_title_malformed {
 ```
 
 _./policy/organization.go_
+
 ```rego
 package organization
 
@@ -108,28 +117,28 @@ warn_two_factor_requirement_disabled {
 ## Executing the policies against a single repository
 
 ```shell
-$ gh api /repos/reposaur/reposaur | rsr
+$ gh api /repos/reposaur/reposaur | rsr exec
 # { ... }
 ```
 
 ## Executing the policies against every repository in an organization
 
 ```shell
-$ gh api /orgs/reposaur/repos --paginate | jq -s add | rsr
+$ gh api /orgs/reposaur/repos --paginate | jq -s add | rsr exec
 # [{ ... }, ...]
 ```
 
 ## Executing the policies against an organization
 
 ```shell
-$ gh api /orgs/reposaur | rsr
+$ gh api /orgs/reposaur | rsr exec
 # { ... }
 ```
 
 ## Uploading a SARIF report to GitHub
 
 ```shell
-$ report=$(gh api /repos/reposaur/reposaur | rsr | gzip | base64)
+$ report=$(gh api /repos/reposaur/reposaur | rsr exec | gzip | base64)
 
 $ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
     -f sarif="$report" \
@@ -141,9 +150,8 @@ $ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
 
 ```shell
 $ gh api /orgs/reposaur/repos --paginate \
-  | jq -s add \
-  | rsr \
-  | jq -r '.[] | @base64' \
+  | rsr exec \
+  | jq -rs '.[] | @base64' \
   | {
     while read r; do
       _r() {
@@ -181,7 +189,7 @@ package repository
 ```
 
 By default, the CLI attempts to detect the namespace based on the data. If
-it's failing to detect a valid namespace, you can specify it manually using the `--namespace <NAMESPACE>` flag.
+it's failing to detect a valid namespace, you can specify it manually using the `--namespace <namespace>` flag.
 
 ## Rules
 
@@ -191,7 +199,7 @@ Reposaur will only query the rules that have the following prefixes (aka "kinds"
 
 Cause the CLI to exit with code `1`, the results in the SARIF report will have the `error` level.
 
-### `warn_` 
+### `warn_`
 
 Cause the CLI to exit with code `0`, the results in the SARIF report will have the `warning` level.
 
@@ -284,9 +292,7 @@ The above rule would be represented in the SARIF report as follows:
   },
   "properties": {
     "security-severity": "9",
-    "tags": [
-      "security"
-    ]
+    "tags": ["security"]
   }
 }
 ```
@@ -308,8 +314,8 @@ resp := github.request("GET /repos/{owner}/{repo}/branches/{branch}/protection",
 
 The response will include the following properties:
 
-* `body` - The HTTP Response body
-* `statusCode` - The HTTP Response status code
+- `body` - The HTTP Response body
+- `statusCode` - The HTTP Response status code
 
 Forbidden errors are treated in a special manner and will cause
 policy execution to halt. Usually these errors happen when authentication is
@@ -324,7 +330,7 @@ Does an HTTP request against the GitHub GraphQL API. For example:
 resp := github.graphql(
 	`
 		query($owner: String!, $name: String!) {
-			repository(owner: $owner, name: $name) { 
+			repository(owner: $owner, name: $name) {
 				name
 			}
 		}
@@ -338,8 +344,8 @@ resp := github.graphql(
 
 The response will include the following properties:
 
-* `body` - The HTTP Response body
-* `statusCode` - The HTTP Response status code
+- `body` - The HTTP Response body
+- `statusCode` - The HTTP Response status code
 
 Forbidden errors are treated in a special manner and will cause
 policy execution to halt. Usually these errors happen when authentication is
@@ -353,7 +359,7 @@ steps:
   - name: Setup Reposaur
     uses: reposaur/reposaur@main
 
-  - run: reposaur --help
+  - run: rsr --help
 ```
 
 # Contributing
