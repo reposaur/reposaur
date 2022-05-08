@@ -14,7 +14,7 @@ import (
 	"github.com/reposaur/reposaur/pkg/output"
 )
 
-type Option func(*Engine)
+type EngineOption func(*Engine)
 
 type Engine struct {
 	modules       map[string]*ast.Module
@@ -22,7 +22,20 @@ type Engine struct {
 	enableTracing bool
 }
 
-func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
+func NewEngine(opts ...EngineOption) *Engine {
+	engine := &Engine{
+		modules:  map[string]*ast.Module{},
+		compiler: ast.NewCompiler().WithEnablePrintStatements(true),
+	}
+
+	for _, opt := range opts {
+		opt(engine)
+	}
+
+	return engine
+}
+
+func NewEngineWithPolicies(ctx context.Context, policyPaths []string, opts ...EngineOption) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
@@ -57,7 +70,7 @@ func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, e
 
 // WithTracingEnabled enables or disables policy
 // execution tracing.
-func WithTracingEnabled(enabled bool) Option {
+func WithTracingEnabled(enabled bool) EngineOption {
 	return func(e *Engine) {
 		e.enableTracing = enabled
 	}
@@ -88,6 +101,27 @@ func (e *Engine) Compiler() *ast.Compiler {
 // Modules returns the modules from the loaded policies.
 func (e *Engine) Modules() map[string]*ast.Module {
 	return e.modules
+}
+
+func (e *Engine) LoadPolicy(filename, policy string) error {
+	module, err := ast.ParseModuleWithOpts(filename, policy, ast.ParserOptions{
+		ProcessAnnotation: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	e.compiler.Compile(map[string]*ast.Module{
+		filename: module,
+	})
+
+	if e.compiler.Failed() {
+		return fmt.Errorf("compiler: %w", e.compiler.Errors)
+	}
+
+	e.modules[filename] = module
+
+	return nil
 }
 
 func (e *Engine) Check(ctx context.Context, namespace string, input interface{}) (output.Report, error) {
