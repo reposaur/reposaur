@@ -6,6 +6,8 @@ builds:
   - id: rsr
     binary: rsr
     main: ./cmd/rsr/rsr.go
+    ldflags:
+      - -s -w -X github.com/reposaur/reposaur/internal/build.Version={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:
@@ -15,6 +17,8 @@ builds:
   - id: reposaur
     binary: reposaur
     main: ./cmd/rsr/rsr.go
+    ldflags:
+      - -s -w -X github.com/reposaur/reposaur/internal/build.Version={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:
@@ -29,15 +33,15 @@ archives:
       386: i386
       amd64: x86_64
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 release:
   github:
     owner: reposaur

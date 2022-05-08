@@ -154,7 +154,7 @@ func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
 		}
 
 		for _, t := range traces {
-			fmt.Println(t)
+			fmt.Fprintln(os.Stderr, t)
 		}
 	}
 
