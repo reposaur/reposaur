@@ -23,14 +23,19 @@ type GitHubTransport struct {
 }
 
 func (t GitHubTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	ghHost := defaultGitHubHost
+	if req.URL.Host == "" {
+		ghHost := defaultGitHubHost
 
-	if host := GetEnv("GITHUB_HOST", "GH_HOST"); host != "" {
-		ghHost = host
+		if host := GetEnv("GITHUB_HOST", "GH_HOST"); host != "" {
+			ghHost = host
+		}
+
+		req.URL.Host = ghHost
 	}
 
-	req.URL.Host = ghHost
-	req.URL.Scheme = "https"
+	if req.URL.Scheme == "" {
+		req.URL.Scheme = "https"
+	}
 
 	t.Logger.Debug().
 		Str("method", req.Method).
