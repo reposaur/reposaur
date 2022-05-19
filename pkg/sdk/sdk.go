@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/policy"
 	"github.com/reposaur/reposaur/pkg/output"
-	"github.com/reposaur/reposaur/pkg/util"
 	"github.com/rs/zerolog"
 )
 
@@ -26,7 +24,6 @@ type Option func(*Reposaur)
 type Reposaur struct {
 	logger        zerolog.Logger
 	engine        *policy.Engine
-	httpClient    *http.Client
 	enableTracing bool
 }
 
@@ -52,15 +49,6 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 		opt(sdk)
 	}
 
-	if sdk.httpClient == nil {
-		sdk.httpClient = &http.Client{
-			Transport: util.GitHubTransport{
-				Logger:    sdk.logger,
-				Transport: http.DefaultTransport,
-			},
-		}
-	}
-
 	var err error
 	sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
 	if err != nil {
@@ -77,14 +65,6 @@ func WithLogger(logger zerolog.Logger) Option {
 	}
 }
 
-// WithHTTPClient sets the HTTP client used by Reposaur's
-// built-in functions.
-func WithHTTPClient(client *http.Client) Option {
-	return func(sdk *Reposaur) {
-		sdk.httpClient = client
-	}
-}
-
 // WithTracingEnabled enables or disables policy
 // execution tracing.
 func WithTracingEnabled(enabled bool) Option {
@@ -96,11 +76,6 @@ func WithTracingEnabled(enabled bool) Option {
 // Logger returns Reposaur's logger.
 func (sdk Reposaur) Logger() zerolog.Logger {
 	return sdk.logger
-}
-
-// Client returns Reposaur's GitHub client.
-func (sdk Reposaur) HTTPClient() *http.Client {
-	return sdk.httpClient
 }
 
 // Engine returns Reposaur's policy engine.

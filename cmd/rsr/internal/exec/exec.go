@@ -69,14 +69,8 @@ func NewCmd() *cobra.Command {
 		}
 		defer outWriter.Close()
 
-		client, err := cmdutil.NewGitHubClient(ctx, params.github)
-		if err != nil {
-			logger.Fatal().Err(err).Msg("failed to create a GitHub Client")
-		}
-
 		opts := []sdk.Option{
 			sdk.WithLogger(*logger),
-			sdk.WithHTTPClient(client),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
 
