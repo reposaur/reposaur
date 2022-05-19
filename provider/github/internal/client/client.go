@@ -12,6 +12,7 @@ var DefaultClient = &defaultClient{httpClient: http.DefaultClient}
 
 type Client interface {
 	Client() *http.Client
+	Do(*http.Request) (*http.Response, error)
 	NewRequest(method, path string, body io.Reader) (*http.Request, error)
 }
 
@@ -56,6 +57,10 @@ type defaultClient struct {
 
 func (c defaultClient) Client() *http.Client {
 	return c.httpClient
+}
+
+func (c defaultClient) Do(req *http.Request) (*http.Response, error) {
+	return c.httpClient.Do(req)
 }
 
 func (c defaultClient) NewRequest(method, path string, body io.Reader) (*http.Request, error) {

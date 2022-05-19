@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 
+	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 )
 
@@ -31,9 +32,9 @@ type Provider interface {
 
 // Builtin is represents a built-in function in the policy engine. It specifies
 // the function signature and the function implementation.
-type Builtin struct {
-	Func rego.Function
-	Impl rego.BuiltinDyn
+type Builtin interface {
+	Func() *rego.Function
+	Impl(rego.BuiltinContext, []*ast.Term) (*ast.Term, error)
 }
 
 func DeriveNamespace(deriver DataDeriver, data any) (Namespace, error) {

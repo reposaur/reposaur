@@ -7,6 +7,5 @@ import (
 )
 
 func RegisterBuiltins(client *http.Client) {
-	rego.RegisterBuiltin2(&GitHubRequestBuiltin, GitHubRequestBuiltinImpl(client))
 	rego.RegisterBuiltin2(&GitHubGraphQLBuiltin, GitHubGraphQLBuiltinImpl(client))
 }
