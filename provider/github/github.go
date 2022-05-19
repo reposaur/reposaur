@@ -2,6 +2,7 @@ package github
 
 import (
 	"github.com/reposaur/reposaur/provider"
+	"github.com/reposaur/reposaur/provider/github/internal/builtin"
 	"github.com/reposaur/reposaur/provider/github/internal/client"
 )
 
@@ -16,7 +17,7 @@ const (
 type GitHub struct {
 	client      client.Client
 	dataDeriver *DataDeriver
-	builtins    []*provider.Builtin
+	builtins    []provider.Builtin
 }
 
 func New(c client.Client) *GitHub {
@@ -29,8 +30,11 @@ func New(c client.Client) *GitHub {
 	)
 
 	return &GitHub{
-		client:   c,
-		builtins: []*provider.Builtin{},
+		client: c,
+		builtins: []provider.Builtin{
+			&builtin.GraphQL{Client: c},
+			&builtin.Request{Client: c},
+		},
 		dataDeriver: &DataDeriver{
 			namespaceToKeys: map[provider.Namespace][]string{
 				IssueNamespace:        {"reactions", "closed_by"},
@@ -51,7 +55,7 @@ func (gh GitHub) DeriveProperties(namespace provider.Namespace, data map[string]
 	return gh.dataDeriver.DeriveProperties(namespace, data)
 }
 
-func (gh GitHub) Builtins() []*provider.Builtin {
+func (gh GitHub) Builtins() []provider.Builtin {
 	return gh.builtins
 }
 

@@ -39,13 +39,13 @@ func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, er
 		return nil, err
 	}
 
-	finalResp := response{}
-
 	resp, err := r.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	var finalResp response
 
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(&finalResp.Body); err != nil {

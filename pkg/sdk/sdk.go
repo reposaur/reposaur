@@ -10,7 +10,6 @@ import (
 
 	"github.com/open-policy-agent/opa/tester"
 	"github.com/open-policy-agent/opa/topdown"
-	"github.com/reposaur/reposaur/internal/builtins"
 	"github.com/reposaur/reposaur/internal/policy"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/util"
@@ -62,12 +61,7 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 		}
 	}
 
-	// TODO: consider not registering builtins globally
-	// to avoid unexpected side-effects by clients
-	builtins.RegisterBuiltins(sdk.httpClient)
-
 	var err error
-
 	sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
 	if err != nil {
 		return nil, err
