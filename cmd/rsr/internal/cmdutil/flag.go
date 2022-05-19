@@ -9,10 +9,6 @@ func AddPolicyPathsFlag(flags *pflag.FlagSet, p *[]string) {
 	flags.StringSliceVarP(p, "policy", "p", []string{"."}, "path to policy files or directories")
 }
 
-func AddNamespaceFlag(flags *pflag.FlagSet, p *string) {
-	flags.StringVarP(p, "namespace", "n", "", "namespace for input")
-}
-
 func AddOutputFlag(flags *pflag.FlagSet, p *string) {
 	flags.StringVarP(p, "output", "o", "-", "output filename")
 }

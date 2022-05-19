@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
-	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
 	"github.com/rs/zerolog"
@@ -18,7 +17,6 @@ import (
 
 type execParams struct {
 	policyPaths    []string
-	namespace      string
 	outputFilename string
 	inputFilename  string
 	enableTracing  bool
@@ -39,7 +37,6 @@ func NewCmd() *cobra.Command {
 
 	cmdutil.AddOutputFlag(flags, &params.outputFilename)
 	cmdutil.AddPolicyPathsFlag(flags, &params.policyPaths)
-	cmdutil.AddNamespaceFlag(flags, &params.namespace)
 	cmdutil.AddTraceFlag(flags, &params.enableTracing)
 	cmdutil.AddGitHubFlags(flags, &params.github)
 
@@ -79,7 +76,7 @@ func NewCmd() *cobra.Command {
 			logger.Fatal().Err(err).Msg("could not instantiate SDK")
 		}
 
-		runExec(ctx, rsr, params.namespace, inReader, outWriter)
+		runExec(ctx, rsr, inReader, outWriter)
 	}
 
 	return cmd
@@ -87,7 +84,7 @@ func NewCmd() *cobra.Command {
 
 // runExec will execute the policies against the data available
 // in inReader. The resulting reports will be outputted to outWriter.
-func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader io.ReadCloser, outWriter io.WriteCloser) {
+func runExec(ctx context.Context, rsr *sdk.Reposaur, inReader io.ReadCloser, outWriter io.WriteCloser) {
 	startTime := time.Now()
 
 	var (
@@ -107,33 +104,14 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 			reportsWg.Add(1)
 
 			go func(input interface{}) {
-				if namespace == "" {
-					ns, err := detector.DetectNamespace(input)
-					if err != nil {
-						logger.Fatal().Err(err).Send()
-					}
-					namespace = ns
-				}
+				logger.Debug().Msg("processing input")
 
-				props, err := detector.DetectReportProperties(namespace, input)
+				report, err := rsr.Check(ctx, input)
 				if err != nil {
 					logger.Fatal().Err(err).Send()
 				}
 
-				processorLogger := logger.With().
-					Interface("props", props).
-					Str("namespace", namespace).
-					Logger()
-
-				processorLogger.Debug().Msg("processing input")
-
-				report, err := rsr.Check(ctx, namespace, input)
-				if err != nil {
-					logger.Fatal().Err(err).Send()
-				}
-				report.Properties = props
-
-				processorLogger.Debug().Msg("done processing input")
+				logger.Debug().Msg("done processing input")
 
 				reportsCh <- report
 			}(input)

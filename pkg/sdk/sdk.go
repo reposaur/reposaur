@@ -3,6 +3,7 @@ package sdk
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -11,8 +12,14 @@ import (
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/policy"
 	"github.com/reposaur/reposaur/pkg/output"
+	"github.com/reposaur/reposaur/provider"
+	"github.com/reposaur/reposaur/provider/github"
 	"github.com/rs/zerolog"
 )
+
+var DefaultProviders = []provider.Provider{
+	github.New(nil),
+}
 
 // Option represents a Reposaur option that can change a
 // particular behavior.
@@ -24,6 +31,7 @@ type Option func(*Reposaur)
 type Reposaur struct {
 	logger        zerolog.Logger
 	engine        *policy.Engine
+	providers     []provider.Provider
 	enableTracing bool
 }
 
@@ -49,6 +57,10 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 		opt(sdk)
 	}
 
+	if len(sdk.providers) == 0 {
+		sdk.providers = DefaultProviders
+	}
+
 	var err error
 	sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
 	if err != nil {
@@ -56,6 +68,13 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 	}
 
 	return sdk, nil
+}
+
+// WithProvider adds a provider to Reposaur.
+func WithProvider(provider provider.Provider) Option {
+	return func(sdk *Reposaur) {
+		sdk.providers = append(sdk.providers, provider)
+	}
 }
 
 // WithLogger sets the logger used by Reposaur.
@@ -83,10 +102,39 @@ func (sdk Reposaur) Engine() *policy.Engine {
 	return sdk.engine
 }
 
-// Check executes the policies loaded with namespace against data
-func (sdk Reposaur) Check(ctx context.Context, namespace string, data interface{}) (output.Report, error) {
-	report, err := sdk.engine.Check(ctx, namespace, data)
+// Check executes the policies loaded against data. Data is checked against every
+// provider to derive a namespace and additional report properties.
+func (sdk Reposaur) Check(ctx context.Context, data interface{}) (output.Report, error) {
+	var (
+		dataProvider provider.Provider
+		namespace    provider.Namespace
+		err          error
+	)
+
+	for _, p := range sdk.providers {
+		namespace, err = provider.DeriveNamespace(p, data)
+		if err != nil {
+			if errors.Is(err, provider.ErrNonDerivable) {
+				continue
+			}
+
+			return output.Report{}, err
+		}
+
+		dataProvider = p
+	}
+
+	if dataProvider == nil {
+		return output.Report{}, errors.New("could not derive a valid namespace from data")
+	}
+
+	report, err := sdk.engine.Check(ctx, string(namespace), data)
 	if err != nil {
+		return output.Report{}, err
+	}
+
+	report.Properties, err = provider.DeriveProperties(dataProvider, namespace, data)
+	if err != nil && !errors.Is(err, provider.ErrNonDerivable) {
 		return output.Report{}, err
 	}
 
