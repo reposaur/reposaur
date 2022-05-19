@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"os"
+
+	"github.com/rs/zerolog"
 )
 
 // GetInputReader returns a io.ReadCloser. If filename
@@ -11,7 +13,7 @@ import (
 // returns a reader from standard input.
 func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err error) {
 	var (
-		logger = LoggerFromContext(ctx)
+		logger = zerolog.Ctx(ctx)
 		file   = os.Stdin
 	)
 
@@ -34,7 +36,7 @@ func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err 
 // returns a writer to standard output.
 func GetOutputWriter(ctx context.Context, filename string) (w io.WriteCloser, err error) {
 	var (
-		logger = LoggerFromContext(ctx)
+		logger = zerolog.Ctx(ctx)
 		file   = os.Stdout
 	)
 

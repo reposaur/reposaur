@@ -7,6 +7,7 @@ import (
 
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
 	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -34,11 +35,11 @@ func NewCmd() *cobra.Command {
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		var (
 			ctx    = cmd.Context()
-			logger = cmdutil.LoggerFromContext(ctx)
+			logger = zerolog.Ctx(ctx)
 		)
 
 		opts := []sdk.Option{
-			sdk.WithLogger(logger),
+			sdk.WithLogger(*logger),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
 
@@ -65,7 +66,7 @@ func NewCmd() *cobra.Command {
 func runTest(ctx context.Context, rsr *sdk.Reposaur) {
 	var (
 		startTime = time.Now()
-		logger    = cmdutil.LoggerFromContext(ctx)
+		logger    = zerolog.Ctx(ctx)
 	)
 
 	results, err := rsr.Test(ctx)
@@ -86,7 +87,7 @@ func runTest(ctx context.Context, rsr *sdk.Reposaur) {
 		}
 	}
 
-	logger = logger.With().
+	testLogger := logger.With().
 		Int("passed", totalTests-failedTests).
 		Int("failed", failedTests).
 		Int("total", totalTests).
@@ -94,10 +95,10 @@ func runTest(ctx context.Context, rsr *sdk.Reposaur) {
 		Logger()
 
 	if failedTests > 0 {
-		logger.Error().Msg("done")
+		testLogger.Error().Msg("done")
 		os.Exit(1)
 	}
 
-	logger.Info().Msg("done")
+	testLogger.Info().Msg("done")
 	os.Exit(0)
 }

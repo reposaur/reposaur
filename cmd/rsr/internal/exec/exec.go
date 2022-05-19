@@ -12,6 +12,7 @@ import (
 	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +46,7 @@ func NewCmd() *cobra.Command {
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		var (
 			ctx    = cmd.Context()
-			logger = cmdutil.LoggerFromContext(ctx)
+			logger = zerolog.Ctx(ctx)
 		)
 
 		if len(args) > 1 {
@@ -74,7 +75,7 @@ func NewCmd() *cobra.Command {
 		}
 
 		opts := []sdk.Option{
-			sdk.WithLogger(logger),
+			sdk.WithLogger(*logger),
 			sdk.WithHTTPClient(client),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
@@ -102,7 +103,7 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 		reportsCh = make(chan output.Report)
 		reportsWg = sync.WaitGroup{}
 
-		logger = cmdutil.LoggerFromContext(ctx)
+		logger = zerolog.Ctx(ctx)
 	)
 
 	// Process inputs
