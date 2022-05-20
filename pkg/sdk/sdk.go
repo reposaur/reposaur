@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/tester"
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/policy"
@@ -59,6 +60,12 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 
 	if len(sdk.providers) == 0 {
 		sdk.providers = DefaultProviders
+	}
+
+	for _, p := range sdk.providers {
+		for _, b := range p.Builtins() {
+			rego.RegisterBuiltinDyn(b.Func(), b.Impl)
+		}
 	}
 
 	var err error
