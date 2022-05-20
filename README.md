@@ -1,408 +1,72 @@
-# Reposaur
+<div align="center">
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/reposaur/reposaur.svg)](https://pkg.go.dev/github.com/reposaur/reposaur)
-[![Go Report Card](https://goreportcard.com/badge/github.com/reposaur/reposaur)](https://goreportcard.com/report/github.com/reposaur/reposaur)
-[![Tests](https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?longCache=true&label=Test&logo=github%20actions&logoColor=fff)](https://github.com/reposaur/reposaur/actions/workflows/test.yml)
+  [![logo][logo]][website]
+  # Reposaur
 
-> Audit your GitHub data using custom policies written in [Rego][rego].
+  [![go-report][go-report-badge]][go-report]
+  [![tests-workflow][tests-workflow-badge]][tests-workflow]
+  [![license][license-badge]]()
+  [![discussions][discussions-badge]][discussions]
+  [![slack][slack-badge]][slack-invite]
+  [![twitter][twitter-badge]][twitter]
 
-Reposaur allows users and organizations to execute policies against GitHub data to
-generate reports, perform auditing and more. The end-goal is to make it easy to
-perform such tasks in an automated way, enabling people to focus their time in solving
-any issues instead of looking for them ([see the examples](#examples)).
+  **Reposaur is the open source compliance tool for development platforms.**
 
-:warning: While version `v1.0.0` is not released, consider the API to be _unstable_. The CLI and its output
-will most probably not change much, except for the fact that it might get a `test` command before the first
-stable release.
+  Audit, verify and report on your data and configurations easily with pre-defined and/or custom policies. <br />
+  Supports GitHub. GitLab, BitBucket and Gitea support soon.
+	
+  ⚠️ before 1.0.0 expect some bugs and API changes ⚠️
+	
+  [Getting started](#getting-started) • 
+  [Installation](#installation) • 
+  [Documentation][docs] • 
+  [Guides](#guides) • 
+  [Integrations](#integrations)
 
-# Features
+</div>
 
-- [x] Write custom policies using [Rego][rego] policy language ([see more](#policies))
-- [x] Simple, composable and easy-to-use CLI ([see more](#examples))
-- [x] Extendable using the Go SDK
-- [x] Output reports in JSON and SARIF formats
-- [x] Use in GitHub Actions ([see more](#use-in-github-actions))
-- [x] Policies unit testing ([see more](#unit-testing))
-- [ ] Deploy as a GitHub App (possible but no official guide yet) (see reposaur/reposaur#2)
+# Getting Started
+
+Have you ever felt like you don't know what's happening in your GitHub/GitLab/BitBucket repositories? Between 100s or 1000s of them it's hard to make sure every single one is compliant to certain security and best practices guidelines.
+
+Reposaur is here to fix that, empowering you to focus on your work instead of hunting for issues and misconfigurations. 
+
+## Features
+
+- Custom policies using the [Rego][rego] policy language ([learn more][docs-policy])
+- A simple, composable and easy-to-use CLI ([learn more][docs-cli])
+- Extendable using a straightforward SDK (written in Go)
+- Reports follow the standard SARIF format, enabling easy integrations with different systems
+- Policies can be unit tested, guaranteeing they work as expected
+- Integration with the major development platforms (see [Integrations](#integrations))
+- Easily integrate new platforms using the SDK
+
+## Guides
+
+- [Writing your first policy](https://docs.reposaur.com/guides/writing-your-first-policy)
 
 # Installation
 
-#### Using Script
-
-```shell
-$ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh | bash
-```
-
-#### Using Go
+#### Go
 
 ```shell
 $ go install github.com/reposaur/reposaur/cmd/rsr@latest
 ```
 
-# Guides
-
-- [Writing & testing your first policy](https://github.com/orgs/reposaur/discussions/1)
-
-# Usage
-
-```bash
-$ rsr --help
-Reposaur - security & compliance for GitHub metadata
-
-Usage:
-  rsr [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  exec        Executes policies against INPUT data
-  help        Help about any command
-  test        Runs the tests available in POLICY_PATH
-
-Flags:
-  -h, --help      help for rsr
-  -v, --verbose   print debug logs
-
-Use "rsr [command] --help" for more information about a command.
-```
-
-# Examples
-
-The following examples assume we're running Reposaur in a directory
-with the following policies inside `./policy` directory. If you're looking
-for more examples of policies check the [reposaur/policy](https://github.com/reposaur/policy) repository.
-
-_./policy/repository.go_
-
-```rego
-package repository
-
-# METADATA
-# title: Repository description is empty
-# description: >
-#   It's important that repositoryies have a short but
-#   meaningful description. A description helps other people
-#   finding the repository more easily and understanding what
-#   the repository is all about.
-warn_description_empty {
-	input.description == null
-}
-```
-
-_./policy/pull_request.go_
-
-```rego
-package pull_request
-
-# METADATA
-# title: Pull Request title is malformed
-# description: Pull Request titles must follow [Conventional Commits](https://www.conventionalcommits.org) guidelines.
-warn_title_malformed {
-	not regex.match("(?i)^(\\w+)(\\(.*\\))?:.*", input.title)
-}
-```
-
-_./policy/organization.go_
-
-```rego
-package organization
-
-# METADATA
-# title: Organization has 2FA requirement disabled
-# description: Organization doesn't require members to have 2FA enabled
-warn_two_factor_requirement_disabled {
-	input.two_factor_requirement_enabled == false
-}
-```
-
-## Executing the policies against a single repository
+#### Script
 
 ```shell
-$ gh api /repos/reposaur/reposaur | rsr exec
-# { ... }
+$ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh | bash
 ```
 
-## Executing the policies against every repository in an organization
-
-```shell
-$ gh api /orgs/reposaur/repos --paginate | jq -s add | rsr exec
-# [{ ... }, ...]
-```
-
-## Executing the policies against an organization
-
-```shell
-$ gh api /orgs/reposaur | rsr exec
-# { ... }
-```
-
-## Uploading a SARIF report to GitHub
-
-```shell
-$ report=$(gh api /repos/reposaur/reposaur | rsr exec | gzip | base64)
-
-$ gh api /repos/reposaur/reposaur/code-scanning/sarifs \
-    -f sarif="$report" \
-    -f commit_sha="..." \
-    -f ref="..."
-```
-
-## Uploading a SARIF report for multiple repositories
-
-```shell
-$ gh api /orgs/reposaur/repos --paginate \
-  | rsr exec \
-  | jq -rs '.[] | @base64' \
-  | {
-    while read r; do
-      _r() {
-        echo ${r} | base64 -d | jq -r ${1}
-      }
-
-      owner=$(_r '.runs[0].properties.owner')
-      repo=$(_r '.runs[0].properties.repo')
-      branch=$(_r '.runs[0].properties.default_branch')
-      commit_sha=$(gh api "/repos/$owner/$repo/branches/$branch" | jq -r '.commit.sha')
-
-      gh api /repos/reposaur/reposaur/code-scanning/sarifs \
-        -f sarif="$(_r '.' | gzip | base64)" \
-        -f commit_sha="$commit_sha" \
-        -f ref="refs/heads/$branch"
-    done
-  }
-```
-
-# Policies
-
-Policies are written in [Rego][rego]. There are some particularities that
-Reposaur takes into consideration, detailed below.
-
-## Namespaces
-
-Reposaur can execute multiple policies against different kinds of data. To distinguish
-which policies should be executed against a particular set of data we use namespaces.
-
-A namespace is defined using the `package` keyword:
-
-```rego
-# This policy has the "repository" namespace
-package repository
-```
-
-By default, the CLI attempts to detect the namespace based on the data. If
-it's failing to detect a valid namespace, you can specify it manually using the `--namespace <namespace>` flag.
-
-## Rules
-
-Reposaur will only query the rules that have the following prefixes (aka "kinds"):
-
-### `violation_`, `fail_`, `error_`
-
-Cause the CLI to exit with code `1`, the results in the SARIF report will have the `error` level.
-
-### `warn_`
-
-Cause the CLI to exit with code `0`, the results in the SARIF report will have the `warning` level.
-
-### `note_`, `info_`
-
-Cause the CLI to exit with code `0`, the results in the SARIF report will have the `note` level.
-
-### Skipping rules
-
-Rules can be skipped by defining a `skip` rule. For example, if have a rule that says repositories
-should be internal but don't want to apply it to public repositories, only private ones, we could
-write the following policy:
-
-```rego
-package repository
-
-skip[rules] {
-	input.visibility == "public"
-	rules := ["visibility_not_internal"]
-}
-
-violation_visibility_not_internal {
-	input.visibility != "internal"
-}
-```
-
-**Skipping by default**
-
-When we have more cases we want to skip than the ones we care about, we can also write
-a default skip rule. For example, if we want to skip every repository except the ones that have
-some naming characteristics, we could write the following policy:
-
-```rego
-package repository
-
-# skips this rule by default
-default skip = {"rules": ["not_that_awesome"]}
-
-# same as returning an empty rules list, which
-# means every rule will be executed if matched
-skip {
-	endswith(input.name, "-awesome")
-}
-
-violation_not_that_awesome {
-	not contains(input.topics, "awesome")
-}
-```
-
-## Metadata
-
-Your rules can be enhanced with additional information that will be added in the final report, independently of the output format.
-The example below includes all possible metadata fields:
-
-```rego
-# METADATA
-# title: Forking is enabled
-# description: >
-#   The repository has forking enabled, which means any member of the organization could
-#   fork it to their own account and change it's visibility to be _public_.
-#
-#   ### Fix
-#
-#   1. Go to the repository's settings
-#
-#   3. Uncheck the "Allow forking" option
-# custom:
-#   tags: [security]
-#   security-severity: 9
-violation_forking_enabled {
-	input.allow_forking
-}
-```
-
-The above rule would be represented in the SARIF report as follows:
-
-```json
-{
-  "id": "repository/violation/forking_enabled",
-  "name": "Forking is enabled",
-  "shortDescription": {
-    "text": "Forking is enabled"
-  },
-  "fullDescription": {
-    "text": "The repository has forking enabled, which means any member of the organization could fork it to their own account and change it's visibility to be _public_.\n### Fix\n1. Go to the repository's settings\n3. Uncheck the \"Allow forking\" option\n",
-    "markdown": "The repository has forking enabled, which means any member of the organization could fork it to their own account and change it's visibility to be _public_.\n### Fix\n1. Go to the repository's settings\n3. Uncheck the \"Allow forking\" option\n"
-  },
-  "help": {
-    "markdown": "The repository has forking enabled, which means any member of the organization could fork it to their own account and change it's visibility to be _public_.\n### Fix\n1. Go to the repository's settings\n3. Uncheck the \"Allow forking\" option\n"
-  },
-  "properties": {
-    "security-severity": "9",
-    "tags": ["security"]
-  }
-}
-```
-
-## Built-in Functions
-
-### `github.request`
-
-Does an HTTP request against the GitHub REST API. Usage is similar to the
-Octokit.js library, for example:
-
-```rego
-resp := github.request("GET /repos/{owner}/{repo}/branches/{branch}/protection", {
-	"owner": input.owner.login,
-	"repo": input.name,
-	"branch": input.default_branch,
-})
-```
-
-The response will include the following properties:
-
-- `body` - The HTTP Response body
-- `statusCode` - The HTTP Response status code
-
-Forbidden errors are treated in a special manner and will cause
-policy execution to halt. Usually these errors happen when authentication is
-required, a token is invalid or doesn't have sufficient permissions or rate limit
-has been exceeded.
-
-### `github.graphql`
-
-Does an HTTP request against the GitHub GraphQL API. For example:
-
-```rego
-resp := github.graphql(
-	`
-		query($owner: String!, $name: String!) {
-			repository(owner: $owner, name: $name) {
-				name
-			}
-		}
-	`,
-	{
-		"owner": input.owner.login,
-		"name": input.name,
-	},
-)
-```
-
-The response will include the following properties:
-
-- `body` - The HTTP Response body
-- `statusCode` - The HTTP Response status code
-
-Forbidden errors are treated in a special manner and will cause
-policy execution to halt. Usually these errors happen when authentication is
-required, a token is invalid or doesn't have sufficient permissions or rate limit
-has been exceeded.
-
-## Unit Testing
-
-Test modules must have a `_test.rego` extension and rules must have the `test_`
-prefix.
-
-For the policy:
-
-- `innersource.rego`:
-
-```rego
-package repository
-
-note_empty_description {
-    input.description == ""
-}
-```
-
-We could write the following test:
-
-- `innersource_test.rego`:
-
-```rego
-package repository
-
-test_empty_description_should_fail {
-    note_empty_description with input.description as ""
-}
-
-test_with_description_should_pass {
-    not note_empty_description with input.description as "some description"
-}
-```
-
-Running these tests should result in success:
-
-```bash
-$ rsr test
-0:00AM INF data.repository.test_empty_description_should_fail: PASS (915µs)
-0:00AM INF data.repository.test_with_description_should_pass: PASS (54.125µs)
-0:00AM INF done failed=0 passed=2 timeEllapsed=1.9335 total=2
-```
-
-# Use in GitHub Actions
-
-```yaml
-steps:
-  - name: Setup Reposaur
-    uses: reposaur/reposaur@main
-
-  - run: rsr --help
-```
+# Integrations
+
+| Platform               | Status      | Details                                                                                   |
+| ---------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| [GitHub][github]       | In progress | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
+| [GitLab][gitlab]       | Planned     | N/A                                                                                       |
+| [Gitea][gitea]         | Planned     | N/A                                                                                       |
+| [BitBucket][bitbucket] | Not planned | N/A                                                                                       |
 
 # Contributing
 
@@ -412,12 +76,34 @@ We appreciate every contribution, thanks for considering it!
 - [Open a Pull Request][pulls] if you have a suggestion, improvement or bug fix
 - [Open a Discussion][discussions] if you have questions or want to discuss ideas
 
-[issues]: https://github.com/reposaur/reposaur/issues
-[pulls]: https://github.com/reposaur/reposaur/pulls
-[discussions]: https://github.com/orgs/reposaur/discussions
-
 # License
 
 This project is released under the [MIT License](LICENSE).
 
+[website]: https://reposaur.com
+[docs]: https://docs.reposaur.com
+[docs-policy]: https://docs.reposaur.com/policy
+[docs-cli]: https://docs.reposaur.com/cli/exec
+[issues]: https://github.com/reposaur/reposaur/issues
+[pulls]: https://github.com/reposaur/reposaur/pulls
+[logo]: https://user-images.githubusercontent.com/8532541/169531963-bafd3cbf-dadd-486d-83cc-10a4d39c1dbc.png
 [rego]: https://www.openpolicyagent.org/docs/latest/policy-language/
+[license]: https://github.com/reposaur/reposaur/blob/main/LICENSE
+[license-badge]: https://img.shields.io/github/license/reposaur/reposaur?style=flat-square&color=blueviolet
+[go-report]: https://goreportcard.com/report/github.com/reposaur/reposaur
+[go-report-badge]: https://goreportcard.com/badge/github.com/reposaur/reposaur?style=flat-square&color=blueviolet
+[tests-workflow]: https://github.com/reposaur/reposaur/actions/workflows/test.yml
+[tests-workflow-badge]: https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?label=tests&style=flat-square
+[discussions]: https://github.com/orgs/reposaur/discussions
+[discussions-badge]: https://img.shields.io/github/discussions/reposaur/reposaur?style=flat-square&color=blueviolet
+[slack-invite]: https://join.slack.com/t/reposaur/shared_invite/zt-18kegr2sm-I50S~8TjnwOXITSvoa4DbA
+[slack-badge]: https://img.shields.io/badge/slack-%40reposaur-blueviolet?style=flat-square
+[twitter]: https://twitter.com/reposaurhq
+[twitter-badge]: https://img.shields.io/badge/twitter-%40reposaurhq-blueviolet?style=flat-square
+[github]: https://github.com
+[github-app]: https://docs.reposaur.com/integrations/github-app
+[github-actions]: https://docs.reposaur.com/integrations/github-actions
+[github-provider]: https://docs.reposaur.com/integrations/github-provider
+[gitlab]: https://gitlab.com
+[gitea]: https://gitea.io
+[bitbucket]: https://bitbucket.org
