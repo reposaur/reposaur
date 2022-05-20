@@ -1,7 +1,6 @@
 package cmdutil
 
 import (
-	"github.com/reposaur/reposaur/pkg/util"
 	githubclient "github.com/reposaur/reposaur/provider/github/client"
 	"github.com/spf13/pflag"
 )
@@ -41,11 +40,11 @@ func AddVerboseFlag(flags *pflag.FlagSet, p *bool) {
 
 func AddGitHubFlags(flags *pflag.FlagSet, p *GitHubClientOptions) {
 	var (
-		defURL            = util.GetEnv("GH_API_URL", "GITHUB_API_URL")
-		defToken          = util.GetEnv("GH_TOKEN", "GITHUB_TOKEN")
-		defAppID          = util.GetInt64Env("GH_APP_ID", "GITHUB_APP_ID")
-		defAppPrivKey     = util.GetEnv("GH_APP_PRIVATE_KEY", "GITHUB_APP_PRIVATE_KEY")
-		defInstallationID = util.GetInt64Env("GH_INSTALLATION_ID", "GITHUB_INSTALLATION_ID")
+		defURL            = getEnv("GH_API_URL", "GITHUB_API_URL")
+		defToken          = getEnv("GH_TOKEN", "GITHUB_TOKEN")
+		defAppID          = getInt64Env("GH_APP_ID", "GITHUB_APP_ID")
+		defAppPrivKey     = getEnv("GH_APP_PRIVATE_KEY", "GITHUB_APP_PRIVATE_KEY")
+		defInstallationID = getInt64Env("GH_INSTALLATION_ID", "GITHUB_INSTALLATION_ID")
 	)
 
 	if defURL == "" {
