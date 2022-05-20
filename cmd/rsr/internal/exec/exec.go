@@ -11,6 +11,8 @@ import (
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/reposaur/reposaur/provider/github"
+	githubclient "github.com/reposaur/reposaur/provider/github/client"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -66,8 +68,14 @@ func NewCmd() *cobra.Command {
 		}
 		defer outWriter.Close()
 
+		githubProvider, err := newGitHubProvider(ctx, &params.github)
+		if err != nil {
+			logger.Fatal().Err(err).Msg("failed to create GitHub provider")
+		}
+
 		opts := []sdk.Option{
 			sdk.WithLogger(*logger),
+			sdk.WithProvider(githubProvider),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
 
@@ -178,4 +186,21 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, inReader io.ReadCloser, out
 
 	// TODO: should exit with 1 if there are failed results
 	os.Exit(0)
+}
+
+func newGitHubProvider(ctx context.Context, opts *cmdutil.GitHubClientOptions) (*github.GitHub, error) {
+	var client *githubclient.Client
+
+	if opts.AppID != 0 && opts.InstallationID != 0 && opts.AppPrivateKey != "" {
+		appClient, err := githubclient.NewAppClient(ctx, opts.BaseURL, opts.AppID, opts.InstallationID, []byte(opts.AppPrivateKey))
+		if err != nil {
+			return nil, err
+		}
+
+		client = appClient
+	} else if opts.Token != "" {
+		client = githubclient.NewTokenClient(ctx, opts.Token)
+	}
+
+	return github.NewProvider(client), nil
 }

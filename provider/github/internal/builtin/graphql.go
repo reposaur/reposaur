@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/provider/github/internal/client"
+	"github.com/reposaur/reposaur/provider/github/client"
 )
 
 type GraphQL struct {
-	Client client.Client
+	Client *client.Client
 }
 
 func (gql GraphQL) Func() *rego.Function {
@@ -64,7 +65,7 @@ func (gql GraphQL) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, 
 	return ast.NewTerm(val), nil
 }
 
-func (gql GraphQL) argsToRequest(terms []*ast.Term) (*http.Request, error) {
+func (gql GraphQL) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error) {
 	if len(terms) != 2 {
 		return nil, fmt.Errorf("wrong number of arguments, expected 2 got %d", len(terms))
 	}

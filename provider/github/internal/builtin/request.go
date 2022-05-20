@@ -9,14 +9,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/provider/github/internal/client"
+	"github.com/reposaur/reposaur/provider/github/client"
 )
 
 type Request struct {
-	Client client.Client
+	Client *client.Client
 }
 
 func (r Request) Func() *rego.Function {
@@ -67,7 +68,7 @@ func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, er
 	return ast.NewTerm(val), nil
 }
 
-func (r Request) argsToRequest(terms []*ast.Term) (*http.Request, error) {
+func (r Request) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error) {
 
 	if len(terms) != 2 {
 		return nil, fmt.Errorf("wrong number of arguments, expected 2 got %d", len(terms))

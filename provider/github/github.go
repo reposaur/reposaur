@@ -2,8 +2,8 @@ package github
 
 import (
 	"github.com/reposaur/reposaur/provider"
+	"github.com/reposaur/reposaur/provider/github/client"
 	"github.com/reposaur/reposaur/provider/github/internal/builtin"
-	"github.com/reposaur/reposaur/provider/github/internal/client"
 )
 
 const (
@@ -15,19 +15,15 @@ const (
 )
 
 type GitHub struct {
-	client      client.Client
+	client      *client.Client
 	dataDeriver *DataDeriver
 	builtins    []provider.Builtin
 }
 
-func New(c client.Client) *GitHub {
+func NewProvider(c *client.Client) *GitHub {
 	if c == nil {
-		c = client.DefaultClient
+		c = client.NewClient(nil)
 	}
-
-	c.Client().Transport = client.NewThrottleTransport(
-		c.Client().Transport,
-	)
 
 	return &GitHub{
 		client: c,

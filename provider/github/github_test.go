@@ -8,7 +8,7 @@ import (
 )
 
 func TestDeriveNamespace(t *testing.T) {
-	gh := github.New(nil)
+	gh := github.NewProvider(nil)
 
 	testData := map[provider.Namespace]map[string]any{
 		github.IssueNamespace: {

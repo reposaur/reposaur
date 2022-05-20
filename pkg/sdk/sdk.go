@@ -18,7 +18,7 @@ import (
 )
 
 var DefaultProviders = []provider.Provider{
-	github.New(nil),
+	github.NewProvider(nil),
 }
 
 // Option represents a Reposaur option that can change a
