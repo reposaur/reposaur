@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
-	"github.com/reposaur/reposaur/pkg/detector"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/pkg/sdk"
+	"github.com/reposaur/reposaur/provider/github"
+	githubclient "github.com/reposaur/reposaur/provider/github/client"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
 type execParams struct {
 	policyPaths    []string
-	namespace      string
 	outputFilename string
 	inputFilename  string
 	enableTracing  bool
@@ -38,14 +39,13 @@ func NewCmd() *cobra.Command {
 
 	cmdutil.AddOutputFlag(flags, &params.outputFilename)
 	cmdutil.AddPolicyPathsFlag(flags, &params.policyPaths)
-	cmdutil.AddNamespaceFlag(flags, &params.namespace)
 	cmdutil.AddTraceFlag(flags, &params.enableTracing)
 	cmdutil.AddGitHubFlags(flags, &params.github)
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		var (
 			ctx    = cmd.Context()
-			logger = cmdutil.LoggerFromContext(ctx)
+			logger = zerolog.Ctx(ctx)
 		)
 
 		if len(args) > 1 {
@@ -68,14 +68,14 @@ func NewCmd() *cobra.Command {
 		}
 		defer outWriter.Close()
 
-		client, err := cmdutil.NewGitHubClient(ctx, params.github)
+		githubProvider, err := newGitHubProvider(ctx, &params.github)
 		if err != nil {
-			logger.Fatal().Err(err).Msg("failed to create a GitHub Client")
+			logger.Fatal().Err(err).Msg("failed to create GitHub provider")
 		}
 
 		opts := []sdk.Option{
-			sdk.WithLogger(logger),
-			sdk.WithHTTPClient(client),
+			sdk.WithLogger(*logger),
+			sdk.WithProvider(githubProvider),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
 
@@ -84,7 +84,7 @@ func NewCmd() *cobra.Command {
 			logger.Fatal().Err(err).Msg("could not instantiate SDK")
 		}
 
-		runExec(ctx, rsr, params.namespace, inReader, outWriter)
+		runExec(ctx, rsr, inReader, outWriter)
 	}
 
 	return cmd
@@ -92,7 +92,7 @@ func NewCmd() *cobra.Command {
 
 // runExec will execute the policies against the data available
 // in inReader. The resulting reports will be outputted to outWriter.
-func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader io.ReadCloser, outWriter io.WriteCloser) {
+func runExec(ctx context.Context, rsr *sdk.Reposaur, inReader io.ReadCloser, outWriter io.WriteCloser) {
 	startTime := time.Now()
 
 	var (
@@ -102,7 +102,7 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 		reportsCh = make(chan output.Report)
 		reportsWg = sync.WaitGroup{}
 
-		logger = cmdutil.LoggerFromContext(ctx)
+		logger = zerolog.Ctx(ctx)
 	)
 
 	// Process inputs
@@ -112,33 +112,14 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 			reportsWg.Add(1)
 
 			go func(input interface{}) {
-				if namespace == "" {
-					ns, err := detector.DetectNamespace(input)
-					if err != nil {
-						logger.Fatal().Err(err).Send()
-					}
-					namespace = ns
-				}
+				logger.Debug().Msg("processing input")
 
-				props, err := detector.DetectReportProperties(namespace, input)
+				report, err := rsr.Check(ctx, input)
 				if err != nil {
 					logger.Fatal().Err(err).Send()
 				}
 
-				processorLogger := logger.With().
-					Interface("props", props).
-					Str("namespace", namespace).
-					Logger()
-
-				processorLogger.Debug().Msg("processing input")
-
-				report, err := rsr.Check(ctx, namespace, input)
-				if err != nil {
-					logger.Fatal().Err(err).Send()
-				}
-				report.Properties = props
-
-				processorLogger.Debug().Msg("done processing input")
+				logger.Debug().Msg("done processing input")
 
 				reportsCh <- report
 			}(input)
@@ -205,4 +186,21 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, namespace string, inReader 
 
 	// TODO: should exit with 1 if there are failed results
 	os.Exit(0)
+}
+
+func newGitHubProvider(ctx context.Context, opts *cmdutil.GitHubClientOptions) (*github.GitHub, error) {
+	var client *githubclient.Client
+
+	if opts.AppID != 0 && opts.InstallationID != 0 && opts.AppPrivateKey != "" {
+		appClient, err := githubclient.NewAppClient(ctx, opts.BaseURL, opts.AppID, opts.InstallationID, []byte(opts.AppPrivateKey))
+		if err != nil {
+			return nil, err
+		}
+
+		client = appClient
+	} else if opts.Token != "" {
+		client = githubclient.NewTokenClient(ctx, opts.Token)
+	}
+
+	return github.NewProvider(client), nil
 }

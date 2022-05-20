@@ -1,8 +1,6 @@
 package root
 
 import (
-	"context"
-
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/exec"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/test"
@@ -26,11 +24,10 @@ func NewCmd() *cobra.Command {
 	cmdutil.AddVerboseFlag(cmd.PersistentFlags(), &params.verbose)
 
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		logger := cmdutil.NewLogger(params.verbose)
+
 		cmd.SetContext(
-			cmdutil.ContextWithLogger(
-				context.Background(),
-				cmdutil.NewLogger(params.verbose),
-			),
+			logger.WithContext(cmd.Context()),
 		)
 	}
 

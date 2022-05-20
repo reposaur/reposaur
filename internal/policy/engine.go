@@ -106,7 +106,7 @@ func (e *Engine) check(ctx context.Context, namespace string, input interface{})
 	}
 
 	for _, mod := range e.Modules() {
-		currNamespace := strings.TrimLeft(mod.Package.Path.String(), "data.")
+		currNamespace := strings.TrimPrefix(mod.Package.Path.String(), "data.")
 		if currNamespace != namespace {
 			continue
 		}

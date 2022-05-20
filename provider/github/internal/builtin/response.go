@@ -1,6 +1,6 @@
-package builtins
+package builtin
 
-type GitHubResponse struct {
+type response struct {
 	StatusCode int         `json:"status"`
 	Body       interface{} `json:"body"`
 }

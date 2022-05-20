@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
-	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
+	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/open-policy-agent/opa v0.40.0
 	github.com/owenrumney/go-sarif/v2 v2.1.1
 	github.com/rs/zerolog v1.26.1
-	github.com/spf13/cobra v1.4.1-0.20220504202302-9e88759b19cd
+	github.com/spf13/cobra v1.4.1-0.20220518005708-5b11656e45a6
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 )
@@ -21,6 +21,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
