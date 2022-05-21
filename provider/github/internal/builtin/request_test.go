@@ -13,7 +13,7 @@ func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 		wantPath    string
 	}{
 		{"GET /happyPath", "GET", "/happyPath"},
-		{"POST /happyPath", "POST", "/happyPath"},
+		{"GeT /happyPath", "GeT", "/happyPath"},
 		{"GET /happy/Path", "GET", "/happy/Path"},
 		{"get /happy/Path", "GET", "/happy/Path"},
 	}
@@ -35,69 +35,31 @@ func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 //Testing strings that have less than 2 arguments so error is expected
 func TestBuildRequestPathWithUnparsedRequestStringWithErrors(t *testing.T) {
 	var tests = []struct {
-		unevaluatedPath     string
-		evaluatedPathParams []string
+		unevaluatedPath string
+		parsedUrl       string
 	}{
-		{"/{potato}", []string{"potato"}},
-		{"/{karma}/{koma}/yes", []string{"karma", "koma"}},
-		{"/port/wine", []string{}},
-	}
-
-	data := map[string]any{
-		"potato": 1,
-		"karma":  "house",
-		"koma":   "test",
+		{"/{potato}", "/1?karma=house&koma=test"},
+		{"/{karma}/{koma}/yes", "/house/test/yes?potato=1"},
+		{"/port/wine", "/port/wine?karma=house&koma=test&potato=1"},
 	}
 
 	for _, tc := range tests {
-		testname := fmt.Sprintf("Getting evatluated params from %s", tc.unevaluatedPath)
+
+		data := map[string]any{
+			"potato": 1,
+			"karma":  "house",
+			"koma":   "test",
+		}
+		testname := fmt.Sprintf("Evaluating params from %s", tc.unevaluatedPath)
 		t.Run(testname, func(t *testing.T) {
-			pathParams := parsePathParams(tc.unevaluatedPath)
-			path := tc.unevaluatedPath
-			evaluatedPathParams := tc.evaluatedPathParams
+			url, err := buildRequestUrl(tc.unevaluatedPath, data)
 
-			url, _ := buildRequestUrl(path, data)
-
-			fmt.Println(url)
-
-			if !Equal(pathParams, evaluatedPathParams) {
-				t.Errorf("got %v, want %v", pathParams, evaluatedPathParams)
+			if err != nil {
+				t.Errorf("got %v, want %v", err, tc.parsedUrl)
+			}
+			if tc.parsedUrl != url {
+				t.Errorf("got %v, want %v", url, tc.parsedUrl)
 			}
 		})
 	}
 }
-
-func Equal(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-//Testing strings that have less than 2 arguments so error is expected
-// func TestBuildRequestPathWithUnparsedRequestStringWithErrors2(t *testing.T) {
-// 	var tests = []struct {
-// 		unparsedReq string
-// 	}{
-// 		{"GET /happyPath/{potato}"},
-// 		{"POST /happyPath"},
-// 	}
-
-// 	for _, tt := range tests {
-// 		testname := fmt.Sprintf("Parsing %s", tt.unparsedReq)
-// 		t.Run(testname, func(t *testing.T) {
-// 			rp, _ := buildRequestPath(tt.unparsedReq)
-// 			pathParams := parsePathParams(rp.path)
-
-// 			var err error
-// 			if err == nil {
-// 				t.Errorf("got %v, want error", err)
-// 			}
-// 		})
-// 	}
-// }

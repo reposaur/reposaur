@@ -82,8 +82,9 @@ func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, er
 }
 
 func (r Request) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error) {
-	if len(terms) != builtinInputArgs {
-		return nil, fmt.Errorf("wrong number of arguments, expected 2 got %d", len(terms))
+	// FIXME: Function receives 2 arguments but terms includes one additional at last index
+	if len(terms) != 3 {
+		return nil, fmt.Errorf("wrong number of arguments, expected 2 got %d", len(terms)-1)
 	}
 
 	var fullPath string
@@ -157,8 +158,10 @@ func splitPath(p string) (string, string, error) {
 		return "", "", fmt.Errorf("wrong number of parts in path, expected 2 got %d", len(pathParts))
 	}
 
-	method := strings.ToLower(pathParts[0])
-	path := pathParts[1]
+	var (
+		method = strings.ToUpper(pathParts[0])
+		path   = pathParts[1]
+	)
 
 	return method, path, nil
 }
