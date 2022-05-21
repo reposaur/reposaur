@@ -24,9 +24,9 @@ type Request struct {
 
 // The function performs an http request to the Github API and is intend to work similarly to Github API v3.
 // Please check https://docs.github.com/en/rest for more information.
-// First term (op1) will relate to an unparsed request string that looks like the following:
+// First term will relate to an unparsed request string that looks like the following:
 // "GET /repos/{owner}/{repo}/branches/{branch}/protection"
-// The second term (op2) relates to the request path values being sent to the api. It is defined as an object and will
+// The second term relates to the request path values being sent to the api. It is defined as an object and will
 // map the strings in between brackets to their provided value in this object
 // {
 //	"owner": "reposaur",
