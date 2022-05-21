@@ -16,10 +16,23 @@ import (
 	"github.com/reposaur/reposaur/provider/github/client"
 )
 
+const builtinInputArgs = 2
+
 type Request struct {
 	Client *client.Client
 }
 
+// The function performs an http request to the Github API and is intend to work similarly to Github API v3.
+// Please check https://docs.github.com/en/rest for more information.
+// First term (op1) will relate to an unparsed request string that looks like the following:
+// "GET /repos/{owner}/{repo}/branches/{branch}/protection"
+// The second term (op2) relates to the request path values being sent to the api. It is defined as an object and will
+// map the strings in between brackets to their provided value in this object
+// {
+//	"owner": "reposaur",
+//	"repo":  "reposaur",
+//	"branch": "main",
+// }.
 func (r Request) Func() *rego.Function {
 	return &rego.Function{
 		Name: "github.request",
@@ -56,7 +69,7 @@ func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, er
 	finalResp.StatusCode = resp.StatusCode
 
 	if finalResp.StatusCode == http.StatusForbidden {
-		b := finalResp.Body.(map[string]interface{})
+		b := finalResp.Body.(map[string]any)
 		return nil, fmt.Errorf("forbidden: %s", b["message"])
 	}
 
@@ -69,25 +82,21 @@ func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, er
 }
 
 func (r Request) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error) {
-
-	if len(terms) != 2 {
+	if len(terms) != builtinInputArgs {
 		return nil, fmt.Errorf("wrong number of arguments, expected 2 got %d", len(terms))
 	}
 
-	var (
-		path string
-		data map[string]any
-	)
-
-	if err := ast.As(terms[0].Value, &path); err != nil {
+	var fullPath string
+	if err := ast.As(terms[0].Value, &fullPath); err != nil {
 		return nil, err
 	}
 
+	var data map[string]any
 	if err := ast.As(terms[1].Value, &data); err != nil {
 		return nil, err
 	}
 
-	method, path, err := r.parsePath(path)
+	method, path, err := splitPath(fullPath)
 	if err != nil {
 		return nil, err
 	}
@@ -96,24 +105,36 @@ func (r Request) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error
 		return nil, fmt.Errorf("only GET requests are supported, got '%s'", method)
 	}
 
-	pathParams := r.parsePathParams(path)
+	u, err := buildRequestUrl(path, data)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, p := range pathParams {
-		v, err := r.valueToString(data[p])
-		if err != nil {
-			return nil, err
+	return r.Client.NewRequest(method, u, nil)
+}
+
+func buildRequestUrl(path string, data map[string]any) (string, error) {
+	pathParams := parsePathParams(path)
+
+	if len(pathParams) != 0 {
+		//replace path parameters with values
+		for _, p := range pathParams {
+			v, err := valueToString(data[p])
+			if err != nil {
+				return "", err
+			}
+
+			path = strings.Replace(path, "{"+p+"}", v, 1)
+			delete(data, p)
 		}
-
-		path = strings.Replace(path, "{"+p+"}", v, 1)
-		delete(data, p)
 	}
 
 	qs := url.Values{}
-
+	//adding remaining data values as query strings
 	for k, v := range data {
-		v, err := r.valueToString(v)
+		v, err := valueToString(v)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		qs.Add(k, v)
@@ -122,30 +143,27 @@ func (r Request) argsToRequest(terms []*ast.Term) (*retryablehttp.Request, error
 
 	u, err := url.Parse(path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
 	u.RawQuery = qs.Encode()
 
-	return r.Client.NewRequest(method, u.String(), nil)
+	return u.String(), err
 }
 
-func (r Request) parsePath(p string) (string, string, error) {
+func splitPath(p string) (string, string, error) {
 	pathParts := strings.Split(p, " ")
 
-	if len(pathParts) != 2 {
+	if len(pathParts) != builtinInputArgs {
 		return "", "", fmt.Errorf("wrong number of parts in path, expected 2 got %d", len(pathParts))
 	}
 
-	var (
-		method = strings.ToLower(pathParts[0])
-		path   = pathParts[1]
-	)
+	method := strings.ToLower(pathParts[0])
+	path := pathParts[1]
 
 	return method, path, nil
 }
 
-func (r Request) parsePathParams(path string) []string {
+func parsePathParams(path string) []string {
 	regex := regexp.MustCompile(`{[a-z]+}`)
 	matches := regex.FindAllString(path, -1)
 
@@ -159,14 +177,14 @@ func (r Request) parsePathParams(path string) []string {
 	return params
 }
 
-func (r Request) valueToString(v interface{}) (string, error) {
+func valueToString(v any) (string, error) {
 	switch tv := v.(type) {
 	case string:
 		return tv, nil
-
 	case json.Number:
 		return tv.String(), nil
-
+	case int:
+		return strconv.Itoa(tv), nil
 	case int64:
 		return strconv.Itoa(int(tv)), nil
 	}
