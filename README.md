@@ -96,7 +96,7 @@ This project is released under the [MIT License](LICENSE).
 [tests-workflow-badge]: https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?label=tests&style=flat-square
 [discussions]: https://github.com/orgs/reposaur/discussions
 [discussions-badge]: https://img.shields.io/github/discussions/reposaur/reposaur?style=flat-square&color=blueviolet
-[slack-invite]: https://join.slack.com/t/reposaur/shared_invite/zt-18kegr2sm-I50S~8TjnwOXITSvoa4DbA
+[slack-invite]: https://slack.reposaur.com
 [slack-badge]: https://img.shields.io/badge/slack-%40reposaur-blueviolet?style=flat-square
 [twitter]: https://twitter.com/reposaurhq
 [twitter-badge]: https://img.shields.io/badge/twitter-%40reposaurhq-blueviolet?style=flat-square
