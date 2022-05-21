@@ -32,8 +32,8 @@ func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 	}
 }
 
-//Testing strings that have less than 2 arguments so error is expected.
-func TestBuildRequestPathWithUnparsedRequestStringWithErrors(t *testing.T) {
+//Testing request path strings to url request.
+func TestBuildRequestPathWithUnparsedRequest(t *testing.T) {
 	var tests = []struct {
 		unevaluatedPath string
 		parsedUrl       string
