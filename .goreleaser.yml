@@ -47,3 +47,15 @@ release:
     owner: reposaur
     name: reposaur
   prerelease: auto
+brews:
+  - tap:
+      owner: reposaur
+      name: homebrew-tap
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@carlosbecker.com
+    commit_msg_template: "chore: brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    folder: Formula
+    homepage: "https://reposaur.com"
+    description: "The open source compliance tool for development platforms."
+    license: "MIT"
