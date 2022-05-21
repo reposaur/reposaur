@@ -47,6 +47,17 @@ Reposaur is here to fix that, empowering you to focus on your work instead of hu
 
 # Installation
 
+#### Homebrew Tap
+
+```shell
+$ brew install reposaur/tap/reposaur
+```
+
+#### DEB, RPM and APK Packages
+
+Download the `.deb`, `.rpm` or `.apk` packages from the [releases page][releases]
+and install them with the appropriate tools.
+
 #### Go
 
 ```shell
@@ -107,3 +118,4 @@ This project is released under the [MIT License](LICENSE).
 [gitlab]: https://gitlab.com
 [gitea]: https://gitea.io
 [bitbucket]: https://bitbucket.org
+[releases]: https://github.com/reposaur/reposaur/releases/latest
