@@ -138,7 +138,7 @@ func (r Request) parsePath(p string) (string, string, error) {
 	}
 
 	var (
-		method = strings.ToLower(pathParts[0])
+		method = strings.ToUpper(pathParts[0])
 		path   = pathParts[1]
 	)
 
