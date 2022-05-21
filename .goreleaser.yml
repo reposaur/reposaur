@@ -2,6 +2,7 @@ before:
   hooks:
     - go mod tidy
     - go vet ./...
+    - ./scripts/completions.sh
 
 builds:
   - id: rsr
@@ -34,6 +35,13 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - completions/*
 
 checksum:
   name_template: "checksums.txt"
@@ -67,6 +75,7 @@ release:
     owner: reposaur
     name: reposaur
   prerelease: auto
+
 brews:
   - tap:
       owner: reposaur
@@ -81,6 +90,12 @@ brews:
     license: "MIT"
     test: |
       system "#{bin}/rsr --version"
+    install: |-
+      bin.install "rsr"
+      bash_completion.install "completions/rsr.bash" => "rsr"
+      zsh_completion.install "completions/rsr.zsh" => "_rsr"
+      fish_completion.install "completions/rsr.fish"
+
 nfpms:
   - vendor: Reposaur
     homepage: https://reposaur.com/
@@ -88,9 +103,26 @@ nfpms:
     description: |-
       The open source compliance tool for development platforms.
     license: MIT
+    contents:
+      - src: ./completions/rsr.bash
+        dst: /usr/share/bash-completion/completions/rsr
+        file_info:
+          mode: 0644
+      - src: ./completions/rsr.fish
+        dst: /usr/share/fish/completions/rsr.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/rsr.zsh
+        dst:  /usr/share/zsh/vendor-completions/_rsr
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/rsr/copyright
+        file_info:
+          mode: 0644
     formats:
       - apk
       - deb
       - rpm
-    section: default
+    section: utils
     priority: extra
