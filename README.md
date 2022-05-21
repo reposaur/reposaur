@@ -47,6 +47,17 @@ Reposaur is here to fix that, empowering you to focus on your work instead of hu
 
 # Installation
 
+#### Homebrew Tap
+
+```shell
+$ brew install reposaur/tap/reposaur
+```
+
+#### DEB, RPM and APK Packages
+
+Download the `.deb`, `.rpm` or `.apk` packages from the [releases page][releases]
+and install them with the appropriate tools.
+
 #### Go
 
 ```shell
@@ -96,7 +107,7 @@ This project is released under the [MIT License](LICENSE).
 [tests-workflow-badge]: https://img.shields.io/github/workflow/status/reposaur/reposaur/Test?label=tests&style=flat-square
 [discussions]: https://github.com/orgs/reposaur/discussions
 [discussions-badge]: https://img.shields.io/github/discussions/reposaur/reposaur?style=flat-square&color=blueviolet
-[slack-invite]: https://join.slack.com/t/reposaur/shared_invite/zt-18kegr2sm-I50S~8TjnwOXITSvoa4DbA
+[slack-invite]: https://slack.reposaur.com
 [slack-badge]: https://img.shields.io/badge/slack-%40reposaur-blueviolet?style=flat-square
 [twitter]: https://twitter.com/reposaurhq
 [twitter-badge]: https://img.shields.io/badge/twitter-%40reposaurhq-blueviolet?style=flat-square
@@ -107,3 +118,4 @@ This project is released under the [MIT License](LICENSE).
 [gitlab]: https://gitlab.com
 [gitea]: https://gitea.io
 [bitbucket]: https://bitbucket.org
+[releases]: https://github.com/reposaur/reposaur/releases/latest
