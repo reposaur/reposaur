@@ -59,3 +59,16 @@ brews:
     homepage: "https://reposaur.com"
     description: "The open source compliance tool for development platforms."
     license: "MIT"
+nfpms:
+  - vendor: Reposaur
+    homepage: https://reposaur.com/
+    maintainer: João Cerqueira <oss@cerqueira.io>
+    description: |-
+      The open source compliance tool for development platforms.
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+    section: default
+    priority: extra
