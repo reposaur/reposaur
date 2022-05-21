@@ -2,6 +2,7 @@ before:
   hooks:
     - go mod tidy
     - go vet ./...
+
 builds:
   - id: rsr
     binary: rsr
@@ -25,6 +26,7 @@ builds:
       - linux
       - windows
       - darwin
+
 archives:
   - replacements:
       darwin: Darwin
@@ -32,16 +34,34 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
 changelog:
+  use: github
   sort: asc
   filters:
     exclude:
-      - "^docs:"
       - "^test:"
+      - "^chore:"
+      - "^build:"
+  groups:
+    - title: 'New Features and updates'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 10
+    - title: 'Documentation updates'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 20
+    - title: Other work
+      order: 999
+
 release:
   github:
     owner: reposaur
@@ -59,6 +79,8 @@ brews:
     homepage: "https://reposaur.com"
     description: "The open source compliance tool for development platforms."
     license: "MIT"
+    test: |
+      system "#{bin}/rsr --version"
 nfpms:
   - vendor: Reposaur
     homepage: https://reposaur.com/
