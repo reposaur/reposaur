@@ -94,10 +94,10 @@ brews:
     commit_msg_template: "chore: brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     folder: Formula
     homepage: "https://reposaur.com"
-    description: "The open source compliance tool for development platforms."
+    description: "Open source compliance tool for development platforms"
     license: "MIT"
     test: |
-      system "#{bin}/rsr --version"
+      system "#{bin}/rsr"
     install: |-
       bin.install "rsr"
       bash_completion.install "completions/rsr.bash" => "rsr"
