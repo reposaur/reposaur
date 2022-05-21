@@ -75,6 +75,14 @@ release:
     owner: reposaur
     name: reposaur
   prerelease: auto
+  footer: |
+    **Full Changelog**: https://github.com/reposaur/reposaur/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+    ## What to do next?
+
+    - Read the [documentation](https://docs.reposaur.com)
+    - Join our [Slack](https://slack.reposaur.com)
+    - Follow us on [Twitter](https://twitter.com/reposaurhq)
 
 brews:
   - tap:
