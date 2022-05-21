@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// Testing valid strings for unsplit request path
+// Testing valid strings for unsplit request path.
 func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 	var tests = []struct {
 		unparsedReq string
@@ -32,7 +32,7 @@ func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 	}
 }
 
-//Testing strings that have less than 2 arguments so error is expected
+//Testing strings that have less than 2 arguments so error is expected.
 func TestBuildRequestPathWithUnparsedRequestStringWithErrors(t *testing.T) {
 	var tests = []struct {
 		unevaluatedPath string
