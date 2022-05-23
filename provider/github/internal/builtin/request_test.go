@@ -32,7 +32,7 @@ func TestBuildRequestPathWithUnsplitRequestString(t *testing.T) {
 	}
 }
 
-//Testing request path strings to url request.
+//Testing request path strings to url request
 func TestBuildRequestPathWithUnparsedRequest(t *testing.T) {
 	var tests = []struct {
 		unevaluatedPath string
@@ -61,5 +61,26 @@ func TestBuildRequestPathWithUnparsedRequest(t *testing.T) {
 				t.Errorf("got %v, want %v", url, tc.parsedUrl)
 			}
 		})
+	}
+}
+
+//Benchmark request path strings to url request
+func BenchmarkBuildRequestPathWithUnparsedRequest(b *testing.B) {
+	var test = struct {
+		unevaluatedPath string
+		parsedUrl       string
+	}{
+		"/{karma}/{koma}/yes", "/house/test/yes?potato=1",
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		data := map[string]any{
+			"potato": 1,
+			"karma":  "house",
+			"koma":   "test",
+		}
+
+		buildRequestUrl(test.unevaluatedPath, data)
+
 	}
 }

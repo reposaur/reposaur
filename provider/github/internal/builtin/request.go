@@ -118,7 +118,7 @@ func buildRequestUrl(path string, data map[string]any) (string, error) {
 	pathParams := parsePathParams(path)
 
 	if len(pathParams) != 0 {
-		//replace path parameters with values
+		// replace path parameters with values
 		for _, p := range pathParams {
 			v, err := valueToString(data[p])
 			if err != nil {
@@ -131,7 +131,7 @@ func buildRequestUrl(path string, data map[string]any) (string, error) {
 	}
 
 	qs := url.Values{}
-	//adding remaining data values as query strings
+	// adding remaining data values as query strings
 	for k, v := range data {
 		v, err := valueToString(v)
 		if err != nil {
