@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/tester"
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/policy"
@@ -33,6 +32,7 @@ type Reposaur struct {
 	logger        zerolog.Logger
 	engine        *policy.Engine
 	providers     []provider.Provider
+	builtins      []provider.Builtin
 	enableTracing bool
 }
 
@@ -64,12 +64,17 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 
 	for _, p := range sdk.providers {
 		for _, b := range p.Builtins() {
-			rego.RegisterBuiltinDyn(b.Func(), b.Impl)
+			sdk.builtins = append(sdk.builtins, b)
 		}
 	}
 
+	policyOpts := []policy.Option{
+		policy.WithTracingEnabled(sdk.enableTracing),
+		policy.WithBuiltins(sdk.builtins),
+	}
+
 	var err error
-	sdk.engine, err = policy.Load(ctx, policyPaths, policy.WithTracingEnabled(sdk.enableTracing))
+	sdk.engine, err = policy.Load(ctx, policyPaths, policyOpts...)
 	if err != nil {
 		return nil, err
 	}
