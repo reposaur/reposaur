@@ -63,9 +63,7 @@ func New(ctx context.Context, policyPaths []string, opts ...Option) (*Reposaur, 
 	}
 
 	for _, p := range sdk.providers {
-		for _, b := range p.Builtins() {
-			sdk.builtins = append(sdk.builtins, b)
-		}
+		sdk.builtins = append(sdk.builtins, p.Builtins()...)
 	}
 
 	policyOpts := []policy.Option{
