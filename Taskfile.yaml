@@ -17,7 +17,7 @@ tasks:
     vars:
       VERSION: devel
     cmds:
-      - go build -ldflags "-s -w -X github.com/reposaur/reposaur/internal/build.Version={{.VERSION}}" -o ./.bin/rsr ./cmd/rsr/rsr.go
+      - go build -ldflags "-s -w -X github.com/reposaur/reposaur/internal/build.Version={{.VERSION}}" -o ./bin/rsr ./cmd/rsr/rsr.go
     silent: true
 
   release:
