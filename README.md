@@ -119,8 +119,8 @@ This project is released under the [MIT License](LICENSE).
 [twitter-badge]: https://img.shields.io/badge/twitter-%40reposaurhq-blueviolet?style=flat-square
 [github]: https://github.com
 [github-app]: https://docs.reposaur.com/integrations/github-app
-[github-actions]: https://docs.reposaur.com/integrations/github-actions
-[github-provider]: https://docs.reposaur.com/integrations/github-provider
+[github-actions]: https://docs.reposaur.com/integrations/github-actions/setup-reposaur
+[github-provider]: https://docs.reposaur.com/
 [gitlab]: https://gitlab.com
 [gitea]: https://gitea.io
 [bitbucket]: https://bitbucket.org
