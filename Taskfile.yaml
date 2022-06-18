@@ -2,9 +2,6 @@
 
 version: "3"
 
-vars:
-  GREETING: Hello, World!
-
 tasks:
   deps:
     run: once
