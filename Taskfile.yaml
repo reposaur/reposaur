@@ -1,0 +1,29 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  deps:
+    run: once
+    cmds:
+      - go mod tidy
+    silent: true
+
+  build:
+    deps: [deps]
+    vars:
+      VERSION: devel
+    cmds:
+      - go build -ldflags "-s -w -X github.com/reposaur/reposaur/internal/build.Version={{.VERSION}}" -o ./.bin/rsr ./cmd/rsr/rsr.go
+    silent: true
+
+  release:
+    cmds:
+      - git tag $(svu)
+      - git push --tags
+      - goreleaser --rm-dist
+      - defer: rm -rf dist
+    silent: true
