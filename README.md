@@ -85,9 +85,13 @@ $ curl -sfL https://get.reposaur.com | bash
 
 We appreciate every contribution, thanks for considering it!
 
+**TLDR;**
+
 - [Open an issue][issues] if you have a problem or found a bug
 - [Open a Pull Request][pulls] if you have a suggestion, improvement or bug fix
 - [Open a Discussion][discussions] if you have questions or want to discuss ideas
+
+Check our [Contributing Guide](CONTRIBUTING.md) for more detailed information.
 
 # License
 
