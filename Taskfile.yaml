@@ -18,8 +18,12 @@ tasks:
     silent: true
 
   release:
+    vars:
+      VERSION:
+        sh: "[ '{{.VERSION}}' != '' ] && echo '{{.VERSION}}' || svu"
     cmds:
-      - git tag $(svu)
+      - git checkout main
+      - git tag {{.VERSION}}
       - git push --tags
       - goreleaser --rm-dist
       - defer: rm -rf dist
