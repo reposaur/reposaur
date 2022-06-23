@@ -1,6 +1,7 @@
 package root
 
 import (
+	"github.com/reposaur/reposaur/cmd/rsr/internal/bundle"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/exec"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/test"
@@ -34,6 +35,7 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(
 		exec.NewCmd(),
 		test.NewCmd(),
+		bundle.NewCmd(),
 	)
 
 	return cmd
