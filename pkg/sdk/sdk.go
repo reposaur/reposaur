@@ -5,15 +5,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
+	"github.com/open-policy-agent/opa/compile"
 	"github.com/open-policy-agent/opa/tester"
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/internal/policy"
 	"github.com/reposaur/reposaur/pkg/output"
 	"github.com/reposaur/reposaur/provider"
 	"github.com/reposaur/reposaur/provider/github"
+
 	"github.com/rs/zerolog"
 )
 
@@ -190,4 +193,18 @@ func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
 	}
 
 	return rawResults, nil
+}
+
+// Bundle builds a new OCI-compatible policy bundle.
+func (sdk Reposaur) Bundle(ctx context.Context, paths []string, out io.Writer) error {
+	c := compile.New().
+		WithOutput(out).
+		WithTarget("rego").
+		WithPaths(paths...)
+
+	if err := c.Build(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
