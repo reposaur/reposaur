@@ -188,6 +188,7 @@ func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
 	return rawResults, nil
 }
 
+// Bundle builds a new OCI-compatible policy bundle.
 func (sdk Reposaur) Bundle(ctx context.Context, paths []string, out io.Writer) error {
 	c := compile.New().
 		WithOutput(out).
