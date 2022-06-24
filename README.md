@@ -1,27 +1,26 @@
 <div align="center">
 
-  [![logo][logo]][website]
-  # Reposaur
+[![logo][logo]][website]
 
-  [![go-report][go-report-badge]][go-report]
-  [![tests-workflow][tests-workflow-badge]][tests-workflow]
-  [![license][license-badge]]()
-  [![discussions][discussions-badge]][discussions]
-  [![slack][slack-badge]][slack-invite]
-  [![twitter][twitter-badge]][twitter]
+# Reposaur
 
-  **Reposaur is the open source compliance tool for development platforms.**
+[![go-report][go-report-badge]][go-report]
+[![tests-workflow][tests-workflow-badge]][tests-workflow]
+[![license][license-badge]]()
+[![discussions][discussions-badge]][discussions]
+[![slack][slack-badge]][slack-invite]
+[![twitter][twitter-badge]][twitter]
 
-  Audit, verify and report on your data and configurations easily with pre-defined and/or custom policies. <br />
-  Supports GitHub. GitLab, BitBucket and Gitea support soon.
-	
-  ⚠️ before 1.0.0 expect some bugs and API changes ⚠️
-	
-  [Getting started](#getting-started) • 
-  [Installation](#installation) • 
-  [Documentation][docs] • 
-  [Guides](#guides) • 
-  [Integrations](#integrations)
+**Reposaur is the open source compliance tool for development platforms.**
+
+Audit, verify and report on your data and configurations easily with pre-defined and/or custom policies. <br />
+Supports GitHub. GitLab, BitBucket and Gitea support soon.
+⚠️ before 1.0.0 expect some bugs and API changes ⚠️
+[Getting started](#getting-started) •
+[Installation](#installation) •
+[Documentation][docs] •
+[Guides](#guides) •
+[Integrations](#integrations)
 
 </div>
 
@@ -29,7 +28,7 @@
 
 Have you ever felt like you don't know what's happening in your GitHub/GitLab/BitBucket repositories? Between 100s or 1000s of them it's hard to make sure every single one is compliant to certain security and best practices guidelines.
 
-Reposaur is here to fix that, empowering you to focus on your work instead of hunting for issues and misconfigurations. 
+Reposaur is here to fix that, empowering you to focus on your work instead of hunting for issues and misconfigurations.
 
 ## Features
 
@@ -66,8 +65,11 @@ $ go install github.com/reposaur/reposaur/cmd/rsr@latest
 
 #### Script
 
+The script will download the latest release to a temporary directory and decompress
+it to `$HOME/.reposaur`.
+
 ```shell
-$ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh | bash
+$ curl -sfL https://get.reposaur.com | bash
 ```
 
 # Integrations
@@ -83,9 +85,13 @@ $ curl -o- https://raw.githubusercontent.com/reposaur/reposaur/main/install.sh |
 
 We appreciate every contribution, thanks for considering it!
 
+**TLDR;**
+
 - [Open an issue][issues] if you have a problem or found a bug
 - [Open a Pull Request][pulls] if you have a suggestion, improvement or bug fix
 - [Open a Discussion][discussions] if you have questions or want to discuss ideas
+
+Check our [Contributing Guide](CONTRIBUTING.md) for more detailed information.
 
 # License
 
@@ -113,8 +119,8 @@ This project is released under the [MIT License](LICENSE).
 [twitter-badge]: https://img.shields.io/badge/twitter-%40reposaurhq-blueviolet?style=flat-square
 [github]: https://github.com
 [github-app]: https://docs.reposaur.com/integrations/github-app
-[github-actions]: https://docs.reposaur.com/integrations/github-actions
-[github-provider]: https://docs.reposaur.com/integrations/github-provider
+[github-actions]: https://docs.reposaur.com/integrations/github-actions/setup-reposaur
+[github-provider]: https://docs.reposaur.com/
 [gitlab]: https://gitlab.com
 [gitea]: https://gitea.io
 [bitbucket]: https://bitbucket.org
