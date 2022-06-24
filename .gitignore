@@ -3,6 +3,7 @@
 /policy/
 /testdata/events/_*.json
 dist/
+bin/
 
 # Generated
 /completions

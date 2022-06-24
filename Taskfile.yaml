@@ -1,0 +1,39 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  deps:
+    run: once
+    cmds:
+      - go mod tidy
+    silent: true
+
+  build:
+    deps: [deps]
+    vars:
+      VERSION: devel
+    cmds:
+      - go build -ldflags "-s -w -X github.com/reposaur/reposaur/internal/build.Version={{.VERSION}}" -o ./bin/rsr ./cmd/rsr/rsr.go
+    silent: true
+
+  release:
+    vars:
+      VERSION:
+        sh: "[ '{{.VERSION}}' != '' ] && echo '{{.VERSION}}' || svu"
+    cmds:
+      - git checkout main
+      - git tag {{.VERSION}}
+      - git push --tags
+      - goreleaser --rm-dist
+      - defer: rm -rf dist
+    silent: true
+
+  unreleased:
+    desc: Prints the commits between main branch and latest version
+    vars:
+      VERSION:
+        sh: "[ '{{.VERSION}}' != '' ] && echo '{{.VERSION}}' || curl -s https://api.github.com/repos/reposaur/reposaur/releases/latest | jq -r '.tag_name'"
+    cmds:
+      - git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit main...{{.VERSION}}
+    silent: true
