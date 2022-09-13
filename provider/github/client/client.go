@@ -17,7 +17,9 @@ const (
 type Client struct {
 	BaseURL *url.URL
 
-	client *retryablehttp.Client
+	client       *retryablehttp.Client
+	appTransport *ghinstallation.Transport
+	token        string
 }
 
 func NewClient(httpClient *http.Client) *Client {
@@ -35,13 +37,16 @@ func NewTokenClient(ctx context.Context, token string) *Client {
 		AccessToken: token,
 	})
 
-	client := oauth2.NewClient(ctx, tokenSrc)
+	oauthClient := oauth2.NewClient(ctx, tokenSrc)
 
-	return NewClient(client)
+	client := NewClient(oauthClient)
+	client.token = token
+
+	return client
 }
 
 func NewAppClient(ctx context.Context, baseURL string, appID, installationID int64, privateKey []byte) (*Client, error) {
-	appTransport, err := ghinstallation.New(nil, appID, installationID, privateKey)
+	appTransport, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -52,11 +57,22 @@ func NewAppClient(ctx context.Context, baseURL string, appID, installationID int
 		Transport: appTransport,
 	}
 
-	return NewClient(httpClient), nil
+	client := NewClient(httpClient)
+	client.appTransport = appTransport
+
+	return client, nil
 }
 
 func (c Client) Client() *http.Client {
 	return c.client.HTTPClient
+}
+
+func (c Client) Token(ctx context.Context) (string, error) {
+	if c.appTransport != nil {
+		return c.appTransport.Token(ctx)
+	}
+
+	return c.token, nil
 }
 
 func (c Client) NewRequest(method, path string, rawBody any) (*retryablehttp.Request, error) {
