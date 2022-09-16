@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/hashicorp/go-retryablehttp v0.7.1
-	github.com/open-policy-agent/opa v0.42.0
+	github.com/open-policy-agent/opa v0.43.1
 	github.com/owenrumney/go-sarif/v2 v2.1.1
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.5.0
@@ -26,7 +26,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
-	github.com/vektah/gqlparser/v2 v2.4.5 // indirect
+	github.com/vektah/gqlparser/v2 v2.4.6 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
