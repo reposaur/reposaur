@@ -22,6 +22,14 @@ type GitHubClientOptions struct {
 	InstallationID int64
 }
 
+type GitLabClientOptions struct {
+	// GitLab API Base URL
+	BaseURL string
+
+	// GitLab Personal Access Token
+	Token string
+}
+
 func AddPolicyPathsFlag(flags *pflag.FlagSet, p *[]string) {
 	flags.StringSliceVarP(p, "policy", "p", []string{"."}, "path to policy files or directories")
 }
@@ -60,4 +68,18 @@ func AddGitHubFlags(flags *pflag.FlagSet, p *GitHubClientOptions) {
 	flags.Int64Var(&p.AppID, "github-app-id", defAppID, "id for GitHub App")
 	flags.StringVar(&p.AppPrivateKey, "github-app-private-key", defAppPrivKey, "base64-encoded private key for GitHub App")
 	flags.Int64Var(&p.InstallationID, "github-installation-id", defInstallationID, "installation ID for GitHub App")
+}
+
+func AddGitLabFlags(flags *pflag.FlagSet, p *GitLabClientOptions) {
+	var (
+		defURL   = getEnv("GL_API_URL", "GITLAB_API_URL")
+		defToken = getEnv("GL_TOKEN", "GITLAB_TOKEN")
+	)
+
+	// if defURL == "" {
+	// 	defURL = gitlabclient.DefaultBaseURL
+	// }
+
+	flags.StringVar(&p.BaseURL, "gitlab-api-url", defURL, "base url GitLab API")
+	flags.StringVar(&p.Token, "gitlab-token", defToken, "token for GitLab")
 }
