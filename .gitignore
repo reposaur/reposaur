@@ -7,3 +7,6 @@ bin/
 
 # Generated
 /completions
+
+# Other
+.idea

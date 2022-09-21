@@ -11,11 +11,25 @@ func TestDeriveNamespace(t *testing.T) {
 	gl := gitlab.NewProvider()
 
 	testData := map[provider.Namespace]map[string]any{
+		gitlab.GroupNamespace: {
+			"projects":                []any{},
+			"subgroup_creation_level": "maintainer",
+		},
+		gitlab.MergeRequestNamespace: {
+			"merge_user":   "",
+			"merge_status": "",
+			"reference":    "",
+		},
 		gitlab.ProjectNamespace: {
 			"namespace": map[string]any{
 				"name": "test",
 			},
 			"name_with_namespace": "test / test",
+		},
+		gitlab.UserNamespace: {
+			"bio":      "",
+			"bot":      "",
+			"pronouns": "",
 		},
 	}
 

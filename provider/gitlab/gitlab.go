@@ -5,7 +5,10 @@ import (
 )
 
 const (
-	ProjectNamespace provider.Namespace = "gitlab.namespace"
+	GroupNamespace        provider.Namespace = "gitlab.group"
+	MergeRequestNamespace provider.Namespace = "gitlab.merge_request"
+	ProjectNamespace      provider.Namespace = "gitlab.project"
+	UserNamespace         provider.Namespace = "gitlab.user"
 )
 
 type GitLab struct {
@@ -17,7 +20,10 @@ func NewProvider() *GitLab {
 	return &GitLab{
 		dataDeriver: &DataDeriver{
 			namespaceToKeys: map[provider.Namespace][]string{
-				ProjectNamespace: {"namespace", "name_with_namespace"},
+				GroupNamespace:        {"projects", "subgroup_creation_level"},
+				MergeRequestNamespace: {"merge_user", "merge_status", "reference"},
+				ProjectNamespace:      {"namespace", "name_with_namespace"},
+				UserNamespace:         {"bio", "bot", "pronouns"},
 			},
 		},
 	}
