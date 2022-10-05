@@ -12,11 +12,13 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/topdown"
 	"github.com/reposaur/reposaur/pkg/output"
+	"github.com/reposaur/reposaur/provider"
 )
 
 type Option func(*Engine)
 
 type Engine struct {
+	builtins      []provider.Builtin
 	modules       map[string]*ast.Module
 	compiler      *ast.Compiler
 	enableTracing bool
@@ -60,6 +62,13 @@ func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, e
 func WithTracingEnabled(enabled bool) Option {
 	return func(e *Engine) {
 		e.enableTracing = enabled
+	}
+}
+
+// WithBuiltins adds custom builtin functions to the Rego instance.
+func WithBuiltins(builtins []provider.Builtin) Option {
+	return func(e *Engine) {
+		e.builtins = builtins
 	}
 }
 
@@ -186,14 +195,20 @@ func (e Engine) querySkip(ctx context.Context, rule *output.Rule, input interfac
 }
 
 func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
-	return rego.New(
+	opts := []func(*rego.Rego){
 		rego.Query(query),
 		rego.Input(input),
 		rego.Compiler(e.compiler),
 		rego.Trace(e.enableTracing),
 		rego.StrictBuiltinErrors(true),
 		rego.PrintHook(topdown.NewPrintHook(os.Stderr)),
-	)
+	}
+
+	for _, b := range e.builtins {
+		opts = append(opts, rego.FunctionDyn(b.Func(), b.Impl))
+	}
+
+	return rego.New(opts...)
 }
 
 func isRegoFile(_ string, info os.FileInfo, depth int) bool {
