@@ -6,7 +6,7 @@ require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/open-policy-agent/opa v0.43.1
-	github.com/owenrumney/go-sarif/v2 v2.1.1
+	github.com/owenrumney/go-sarif/v2 v2.1.2
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
