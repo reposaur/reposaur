@@ -61,13 +61,21 @@ func NewCmd() *cobra.Command {
 		if err != nil {
 			logger.Fatal().Err(err).Msg("failed to get input reader")
 		}
-		defer inReader.Close()
+		defer func() {
+			if err := inReader.Close(); err != nil {
+				logger.Fatal().Err(err).Msg("failed to close input reader")
+			}
+		}()
 
 		outWriter, err := cmdutil.GetOutputWriter(ctx, params.outputFilename)
 		if err != nil {
 			logger.Fatal().Err(err).Msg("failed to get output writer")
 		}
-		defer outWriter.Close()
+		defer func() {
+			if err := outWriter.Close(); err != nil {
+				logger.Fatal().Err(err).Msg("failed to close output reader")
+			}
+		}()
 
 		githubProvider, err := newGitHubProvider(ctx, &params.github)
 		if err != nil {

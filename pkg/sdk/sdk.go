@@ -181,7 +181,9 @@ func (sdk Reposaur) Test(ctx context.Context) ([]*tester.Result, error) {
 		}
 
 		for _, t := range traces {
-			fmt.Fprintln(os.Stderr, t)
+			if _, err := fmt.Fprintln(os.Stderr, t); err != nil {
+				return nil, err
+			}
 		}
 	}
 
