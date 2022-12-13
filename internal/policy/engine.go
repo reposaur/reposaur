@@ -22,7 +22,7 @@ type Engine struct {
 	enableTracing bool
 }
 
-func Load(ctx context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
+func Load(_ context.Context, policyPaths []string, opts ...Option) (*Engine, error) {
 	policies, err := loader.NewFileLoader().
 		WithProcessAnnotation(true).
 		Filtered(policyPaths, isRegoFile)
@@ -63,7 +63,7 @@ func WithTracingEnabled(enabled bool) Option {
 	}
 }
 
-// Namespaces returns all of the namespaces in the engine.
+// Namespaces returns all the namespaces in the engine.
 func (e *Engine) Namespaces() []string {
 	var namespaces []string
 	for _, module := range e.Modules() {
@@ -114,7 +114,7 @@ func (e *Engine) check(ctx context.Context, namespace string, input interface{})
 		for _, r := range mod.Rules {
 			var annotations *ast.Annotations
 			for _, a := range mod.Annotations {
-				if a.Scope == "rule" && a.GetTargetPath().String() == r.Path().String() {
+				if a.Scope == "rule" && a.GetTargetPath().String() == r.Ref().String() {
 					annotations = a
 				}
 			}
@@ -149,7 +149,7 @@ func (e *Engine) check(ctx context.Context, namespace string, input interface{})
 	return report, nil
 }
 
-func (e Engine) queryRule(ctx context.Context, rule *output.Rule, input interface{}) (*output.Result, error) {
+func (e *Engine) queryRule(ctx context.Context, rule *output.Rule, input interface{}) (*output.Result, error) {
 	query := fmt.Sprintf("data.%s.%s_%s", rule.Namespace, rule.Kind, rule.ID)
 	regoInstance := e.buildRegoInstance(query, input)
 
@@ -167,7 +167,7 @@ func (e Engine) queryRule(ctx context.Context, rule *output.Rule, input interfac
 	return &result, nil
 }
 
-func (e Engine) querySkip(ctx context.Context, rule *output.Rule, input interface{}) (*output.Result, error) {
+func (e *Engine) querySkip(ctx context.Context, rule *output.Rule, input interface{}) (*output.Result, error) {
 	query := fmt.Sprintf("data.%s.skip[_][_] == %q", rule.Namespace, rule.ID)
 	regoInstance := e.buildRegoInstance(query, input)
 
@@ -185,7 +185,7 @@ func (e Engine) querySkip(ctx context.Context, rule *output.Rule, input interfac
 	return &result, nil
 }
 
-func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
+func (e *Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
 	return rego.New(
 		rego.Query(query),
 		rego.Input(input),
@@ -196,6 +196,6 @@ func (e Engine) buildRegoInstance(query string, input interface{}) *rego.Rego {
 	)
 }
 
-func isRegoFile(_ string, info os.FileInfo, depth int) bool {
+func isRegoFile(_ string, info os.FileInfo, _ int) bool {
 	return !info.IsDir() && !strings.HasSuffix(info.Name(), bundle.RegoExt)
 }
