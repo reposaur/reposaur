@@ -34,7 +34,7 @@ func (r Request) Func() *rego.Function {
 	}
 }
 
-func (r Request) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, error) {
+func (r Request) Impl(_ rego.BuiltinContext, terms []*ast.Term) (*ast.Term, error) {
 	req, err := r.argsToRequest(terms)
 	if err != nil {
 		return nil, err

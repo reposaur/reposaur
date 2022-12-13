@@ -31,7 +31,7 @@ func (gql GraphQL) Func() *rego.Function {
 	}
 }
 
-func (gql GraphQL) Impl(ctx rego.BuiltinContext, terms []*ast.Term) (*ast.Term, error) {
+func (gql GraphQL) Impl(_ rego.BuiltinContext, terms []*ast.Term) (*ast.Term, error) {
 	req, err := gql.argsToRequest(terms)
 	if err != nil {
 		return nil, err

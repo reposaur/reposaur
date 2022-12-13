@@ -75,10 +75,10 @@ $ curl -sfL https://get.reposaur.com | bash
 # Integrations
 
 | Platform               | Status      | Details                                                                                   |
-| ---------------------- | ----------- | ----------------------------------------------------------------------------------------- |
-| [GitHub][github]       | Stable      | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
+|------------------------|-------------|-------------------------------------------------------------------------------------------|
+| [GitHub][github]       | In progress | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
 | [GitLab][gitlab]       | In progress | [Provider][gitlab-provider]                                                               |
-| [Gitea][gitea]         | Not planned | N/A                                                                                       |
+| [Gitea][gitea]         | Planned     | N/A                                                                                       |
 | [BitBucket][bitbucket] | Not planned | N/A                                                                                       |
 
 # Contributing

@@ -75,7 +75,7 @@ Visit the [Pull Requests][pulls] page.
 
 ## Releasing
 
-To create new releases you'll need to have following tools installed:
+To create new releases you'll need to have the following tools installed:
 
 - [GoReleaser][goreleaser] >= 1.9
 - [svu][svu] >= 1.9

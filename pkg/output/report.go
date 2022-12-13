@@ -136,24 +136,3 @@ func (r Rule) CausesFailure() bool {
 func (r Rule) UID() string {
 	return fmt.Sprintf("%s/%s/%s", r.Namespace, r.Kind, r.ID)
 }
-
-func MergeReports(reports []Report) Report {
-	report := Report{
-		Rules:   make(map[string]*Rule),
-		Results: make(map[string]*Result),
-	}
-
-	for _, r := range reports {
-		report.RuleCount += r.RuleCount
-
-		for k, v := range r.Rules {
-			report.Rules[k] = v
-		}
-
-		for k, v := range r.Results {
-			report.Results[k] = v
-		}
-	}
-
-	return report
-}

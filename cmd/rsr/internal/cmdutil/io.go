@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// GetInputReader returns a io.ReadCloser. If filename
-// is not empty, the file is opened and returned. Otherwise
+// GetInputReader returns an io.ReadCloser. If filename
+// is not empty, the file is opened and returned. Otherwise,
 // returns a reader from standard input.
 func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err error) {
 	var (
@@ -31,8 +31,8 @@ func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err 
 	return file, nil
 }
 
-// GetOutputWriter returns a io.WriteCloser. If filename
-// is not empty, the file is opened and returned. Otherwise
+// GetOutputWriter returns an io.WriteCloser. If filename
+// is not empty, the file is opened and returned. Otherwise,
 // returns a writer to standard output.
 func GetOutputWriter(ctx context.Context, filename string) (w io.WriteCloser, err error) {
 	var (

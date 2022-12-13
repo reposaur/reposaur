@@ -62,7 +62,7 @@ func NewCmd() *cobra.Command {
 // to the provided  outWriter.
 //
 // If any test fails, the function will exit with code 1.
-// Otherwise exits with code 0.
+// Otherwise, exits with code 0.
 func runTest(ctx context.Context, rsr *sdk.Reposaur) {
 	var (
 		startTime = time.Now()
@@ -91,7 +91,7 @@ func runTest(ctx context.Context, rsr *sdk.Reposaur) {
 		Int("passed", totalTests-failedTests).
 		Int("failed", failedTests).
 		Int("total", totalTests).
-		Dur("timeEllapsed", time.Since(startTime)).
+		Dur("timeElapsed", time.Since(startTime)).
 		Logger()
 
 	if failedTests > 0 {

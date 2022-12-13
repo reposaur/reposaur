@@ -3,6 +3,7 @@ package exec
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"sync"
@@ -162,7 +163,7 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, inReader io.ReadCloser, out
 	for {
 		var input interface{}
 
-		if err := dec.Decode(&input); err == io.EOF {
+		if err := dec.Decode(&input); errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
 			logger.Fatal().Err(err).Msg("failed to decode input")
@@ -193,7 +194,7 @@ func runExec(ctx context.Context, rsr *sdk.Reposaur, inReader io.ReadCloser, out
 	close(reportsCh)
 	logger.Debug().Msg("closed reports channel")
 
-	logger.Info().Dur("timeElappsed", time.Since(startTime)).Msg("done")
+	logger.Info().Dur("timeElapsed", time.Since(startTime)).Msg("done")
 
 	// TODO: should exit with 1 if there are failed results
 	os.Exit(0)

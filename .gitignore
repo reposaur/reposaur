@@ -8,5 +8,7 @@ bin/
 # Generated
 /completions
 
-# Other
-.idea
+# Editors
+/.idea
+/.vscode
+/.fleet
