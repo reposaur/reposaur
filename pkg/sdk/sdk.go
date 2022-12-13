@@ -102,12 +102,12 @@ func WithTracingEnabled(enabled bool) Option {
 	}
 }
 
-// Logger returns Reposaur's logger.
+// Logger returns Reposaur logger.
 func (sdk Reposaur) Logger() zerolog.Logger {
 	return sdk.logger
 }
 
-// Engine returns Reposaur's policy engine.
+// Engine returns Reposaur policy engine.
 func (sdk Reposaur) Engine() *policy.Engine {
 	return sdk.engine
 }

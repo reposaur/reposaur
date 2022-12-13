@@ -45,7 +45,7 @@ func NewTokenClient(ctx context.Context, token string) *Client {
 	return client
 }
 
-func NewAppClient(ctx context.Context, baseURL string, appID, installationID int64, privateKey []byte) (*Client, error) {
+func NewAppClient(_ context.Context, baseURL string, appID, installationID int64, privateKey []byte) (*Client, error) {
 	appTransport, err := ghinstallation.New(http.DefaultTransport, appID, installationID, privateKey)
 	if err != nil {
 		return nil, err

@@ -75,7 +75,7 @@ $ curl -sfL https://get.reposaur.com | bash
 # Integrations
 
 | Platform               | Status      | Details                                                                                   |
-| ---------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+|------------------------|-------------|-------------------------------------------------------------------------------------------|
 | [GitHub][github]       | In progress | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
 | [GitLab][gitlab]       | Planned     | N/A                                                                                       |
 | [Gitea][gitea]         | Planned     | N/A                                                                                       |
