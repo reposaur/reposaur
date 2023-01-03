@@ -38,10 +38,6 @@ func AddVerboseFlag(flags *pflag.FlagSet, p *bool) {
 	flags.BoolVarP(p, "verbose", "v", false, "print debug logs")
 }
 
-func AddExperimentalFlag(flags *pflag.FlagSet, p *bool) {
-	flags.BoolVar(p, "experimental", false, "accepts the usage of experimental features")
-}
-
 func AddGitHubFlags(flags *pflag.FlagSet, p *GitHubClientOptions) {
 	var (
 		defURL            = getEnv("GH_API_URL", "GITHUB_API_URL")

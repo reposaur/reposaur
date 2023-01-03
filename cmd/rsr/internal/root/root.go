@@ -1,12 +1,12 @@
 package root
 
 import (
-	"github.com/reposaur/reposaur/cmd/rsr/internal/bundle"
 	"github.com/reposaur/reposaur/cmd/rsr/internal/cmdutil"
-	"github.com/reposaur/reposaur/cmd/rsr/internal/exec"
-	"github.com/reposaur/reposaur/cmd/rsr/internal/test"
+	"github.com/reposaur/reposaur/cmd/rsr/internal/eval"
 	"github.com/reposaur/reposaur/internal/build"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slog"
+	"os"
 )
 
 type rootParams struct {
@@ -17,7 +17,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Version: build.Version,
 		Use:     "rsr",
-		Short:   "Reposaur - security & compliance for GitHub metadata",
+		Short:   "Reposaur - security & compliance for GitHub",
 	}
 
 	params := &rootParams{}
@@ -25,17 +25,24 @@ func NewCmd() *cobra.Command {
 	cmdutil.AddVerboseFlag(cmd.PersistentFlags(), &params.verbose)
 
 	cmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		logger := cmdutil.NewLogger(params.verbose)
+		loggerOpts := slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}
 
-		cmd.SetContext(
-			logger.WithContext(cmd.Context()),
+		if params.verbose {
+			loggerOpts.Level = slog.LevelDebug
+			loggerOpts.AddSource = true
+		}
+
+		logger := slog.New(
+			loggerOpts.NewTextHandler(os.Stderr).WithGroup("reposaur"),
 		)
+
+		cmd.SetContext(slog.NewContext(cmd.Context(), logger))
 	}
 
 	cmd.AddCommand(
-		exec.NewCmd(),
-		test.NewCmd(),
-		bundle.NewCmd(),
+		eval.NewCmd(),
 	)
 
 	return cmd

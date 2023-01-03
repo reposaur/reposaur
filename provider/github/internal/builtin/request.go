@@ -3,6 +3,7 @@ package builtin
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/reposaur/reposaur/provider/github/client"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -13,15 +14,14 @@ import (
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/provider/github/client"
 )
 
 type Request struct {
 	Client *client.Client
 }
 
-func (r Request) Func() *rego.Function {
-	return &rego.Function{
+func (r Request) Func() *ast.Builtin {
+	return &ast.Builtin{
 		Name: "github.request",
 		Decl: types.NewFunction(
 			types.Args(
@@ -30,7 +30,6 @@ func (r Request) Func() *rego.Function {
 			),
 			types.A,
 		),
-		Memoize: true,
 	}
 }
 
