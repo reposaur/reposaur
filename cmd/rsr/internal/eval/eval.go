@@ -65,24 +65,14 @@ func NewCmd() *cobra.Command {
 			logger.Error("failed to open input reader", err)
 			os.Exit(1)
 		}
-		defer func() {
-			if err := inReader.Close(); err != nil {
-				logger.Error("failed to close input reader", err)
-				os.Exit(1)
-			}
-		}()
+		defer inReader.Close()
 
 		outWriter, err := cmdutil.GetOutputWriter(ctx, params.outputFilename)
 		if err != nil {
 			logger.Error("failed to open output writer", err)
 			os.Exit(1)
 		}
-		defer func() {
-			if err := outWriter.Close(); err != nil {
-				logger.Error("failed to close output reader", err)
-				os.Exit(1)
-			}
-		}()
+		defer outWriter.Close()
 
 		githubProvider, err := newGitHubProvider(ctx, &params.github)
 		if err != nil {
@@ -133,49 +123,12 @@ func runEval(ctx context.Context, rsr *reposaur.Reposaur, inReader io.ReadCloser
 
 	// Output reports
 	go func() {
-		enc := json.NewEncoder(outWriter)
-		enc.SetIndent("", "  ")
-
-		for report := range reportsCh {
-			sarif, err := report.SARIF()
-			if err != nil {
-				logger.Error("failed to get SARIF report", err)
-			}
-
-			if err := enc.Encode(sarif); err != nil {
-				logger.Error("failed to encode report as JSON", err)
-			}
-
-			reportsWg.Done()
-		}
+		outputReports(ctx, outWriter, reportsCh, &reportsWg)
 	}()
 
-	// Start processing inputs
-	dec := json.NewDecoder(inReader)
-
-	for {
-		var input interface{}
-
-		if err := dec.Decode(&input); errors.Is(err, io.EOF) {
-			break
-		} else if err != nil {
-			logger.Error("failed to decode input", err)
-			os.Exit(1)
-		}
-
-		switch inputT := input.(type) {
-		case map[string]any:
-			logger.Debug("received 1 input")
-			inputsWg.Add(1)
-			inputsCh <- inputT
-
-		case []any:
-			logger.Debug("received multiple inputs", "len", len(inputT))
-			for _, input := range inputT {
-				inputsWg.Add(1)
-				inputsCh <- input
-			}
-		}
+	if err := readInput(ctx, inReader, inputsCh, &inputsWg); err != nil {
+		logger.Error("failed to decode input", err)
+		os.Exit(1)
 	}
 
 	inputsWg.Wait()
@@ -213,6 +166,55 @@ func processInputs(ctx context.Context, rsr *reposaur.Reposaur, inputsCh chan an
 			reportsCh <- report
 		}(input)
 	}
+}
+
+func outputReports(ctx context.Context, outWriter io.WriteCloser, reportsCh chan *reposaur.Report, reportsWg *sync.WaitGroup) {
+	logger := slog.FromContext(ctx)
+	enc := json.NewEncoder(outWriter)
+	enc.SetIndent("", "  ")
+
+	for report := range reportsCh {
+		sarif, err := report.SARIF()
+		if err != nil {
+			logger.Error("failed to get SARIF report", err)
+		}
+
+		if err := enc.Encode(sarif); err != nil {
+			logger.Error("failed to encode report as JSON", err)
+		}
+
+		reportsWg.Done()
+	}
+}
+
+func readInput(ctx context.Context, inReader io.ReadCloser, inputsCh chan any, inputsWg *sync.WaitGroup) error {
+	logger := slog.FromContext(ctx)
+
+	for {
+		var input any
+
+		if err := json.NewDecoder(inReader).Decode(&input); errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		switch inputT := input.(type) {
+		case map[string]any:
+			logger.Debug("received 1 input")
+			inputsWg.Add(1)
+			inputsCh <- inputT
+
+		case []any:
+			logger.Debug("received multiple inputs", "len", len(inputT))
+			for _, input := range inputT {
+				inputsWg.Add(1)
+				inputsCh <- input
+			}
+		}
+	}
+
+	return nil
 }
 
 func newGitHubProvider(ctx context.Context, opts *cmdutil.GitHubClientOptions) (*github.GitHub, error) {
