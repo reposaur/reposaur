@@ -13,9 +13,9 @@
 
 **Reposaur is the open source compliance tool for development platforms.**
 
-Audit, verify and report on your data and configurations easily with pre-defined and/or custom policies. <br />
-Supports GitHub. GitLab, BitBucket and Gitea support soon.
-⚠️ before 1.0.0 expect some bugs and API changes ⚠️
+Audit, verify and report on your data and configurations easily with pre-defined and/or custom policies. Currently only supports
+GitHub.
+
 [Getting started](#getting-started) •
 [Installation](#installation) •
 [Documentation][docs] •
@@ -26,7 +26,8 @@ Supports GitHub. GitLab, BitBucket and Gitea support soon.
 
 # Getting Started
 
-Have you ever felt like you don't know what's happening in your GitHub/GitLab/BitBucket repositories? Between 100s or 1000s of them it's hard to make sure every single one is compliant to certain security and best practices guidelines.
+Have you ever felt like you don't know what's happening in your GitHub/GitLab/BitBucket repositories?
+Between 100s or 1000s of them it's hard to make sure every single one is compliant to certain security and best practices guidelines.
 
 Reposaur is here to fix that, empowering you to focus on your work instead of hunting for issues and misconfigurations.
 
@@ -60,7 +61,7 @@ and install them with the appropriate tools.
 #### Go
 
 ```shell
-$ go install github.com/reposaur/reposaur/cmd/rsr@latest
+$ go install github.com/reposaur/reposaur/cmd/rsr@next
 ```
 
 #### Script
@@ -77,8 +78,8 @@ $ curl -sfL https://get.reposaur.com | bash
 | Platform               | Status      | Details                                                                                   |
 |------------------------|-------------|-------------------------------------------------------------------------------------------|
 | [GitHub][github]       | In progress | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
-| [GitLab][gitlab]       | Planned     | N/A                                                                                       |
-| [Gitea][gitea]         | Planned     | N/A                                                                                       |
+| [GitLab][gitlab]       | Not planned | N/A                                                                                       |
+| [Gitea][gitea]         | Not planned | N/A                                                                                       |
 | [BitBucket][bitbucket] | Not planned | N/A                                                                                       |
 
 # Contributing
@@ -95,7 +96,7 @@ Check our [Contributing Guide](CONTRIBUTING.md) for more detailed information.
 
 # License
 
-This project is released under the [MIT License](LICENSE).
+This project is released under the [Apache  License](LICENSE).
 
 [website]: https://reposaur.com
 [docs]: https://docs.reposaur.com

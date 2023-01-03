@@ -1,46 +1,41 @@
 package github_test
 
 import (
-	"testing"
-
-	"github.com/reposaur/reposaur/provider"
+	"embed"
+	"encoding/json"
 	"github.com/reposaur/reposaur/provider/github"
+	"github.com/stretchr/testify/require"
+	"strings"
+	"testing"
 )
 
-func TestDeriveNamespace(t *testing.T) {
-	gh := github.NewProvider(nil)
+//go:embed testdata/*.json
+var testdataFS embed.FS
 
-	testData := map[provider.Namespace]map[string]any{
-		github.IssueNamespace: {
-			"reactions": ":+1:",
-			"closed_by": "crqra",
-		},
-		github.OrganizationNamespace: {
-			"login":       "reposaur",
-			"members_url": "https://reposaur.com",
-		},
-		github.PullRequestNamespace: {
-			"base": "main",
-			"head": "feat",
-		},
-		github.RepositoryNamespace: {
-			"owner":     "reposaur",
-			"full_name": "reposaur/reposaur",
-		},
-		github.UserNamespace: {
-			"login":    "crqra",
-			"hireable": true,
-		},
-	}
+func TestSchemas(t *testing.T) {
+	t.Parallel()
 
-	for expected, data := range testData {
-		namespace, err := gh.DeriveNamespace(data)
-		if err != nil {
-			t.Fatalf("testing %s: %s", expected, err)
-		}
+	gh := &github.GitHub{}
 
-		if namespace != expected {
-			t.Fatalf("expected namespace to be '%s' got '%s'", expected, namespace)
-		}
+	for _, schema := range gh.Schemas() {
+		t.Run(schema.Name(), func(t *testing.T) {
+			entries, err := testdataFS.ReadDir("testdata")
+			require.NoError(t, err)
+
+			for _, e := range entries {
+				if !strings.HasPrefix(e.Name(), schema.Name()) {
+					continue
+				}
+
+				t.Run(e.Name(), func(t *testing.T) {
+					data, err := testdataFS.ReadFile("testdata/" + e.Name())
+					require.NoError(t, err)
+
+					var input any
+					require.NoError(t, json.Unmarshal(data, &input))
+					require.NoErrorf(t, schema.Validate(input), "testdata/%s isn't a valid %s", e.Name(), schema.Name())
+				})
+			}
+		})
 	}
 }

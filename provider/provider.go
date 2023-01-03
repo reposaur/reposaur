@@ -2,94 +2,52 @@ package provider
 
 import (
 	"encoding/json"
-	"errors"
-	"reflect"
-
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
+	"github.com/santhosh-tekuri/jsonschema/v5"
 )
 
-var ErrNonDerivable = errors.New("data is non derivable")
-
-type Namespace string
-
-// DataDeriver is the interface that provides functions to derive a policy
-// namespace and report properties from input data for a specific provider.
-type DataDeriver interface {
-	DeriveNamespace(map[string]any) (Namespace, error)
-	DeriveProperties(Namespace, map[string]any) (map[string]any, error)
-}
-
-// Provider is the interface that provides the functions required to work with
-// a specific provider, namely a function to register built-in functions in
-// the policy engine and functions to derive required information from input data.
-// See DataDeriver.
 type Provider interface {
-	DataDeriver
-
 	Builtins() []Builtin
+	Schemas() []*Schema
 }
 
-// Builtin is represents a built-in function in the policy engine. It specifies
-// the function signature and the function implementation.
+// Builtin is a built-in function that can be used inside policies.
 type Builtin interface {
-	Func() *rego.Function
+	Func() *ast.Builtin
 	Impl(rego.BuiltinContext, []*ast.Term) (*ast.Term, error)
 }
 
-func DeriveNamespace(deriver DataDeriver, data any) (Namespace, error) {
-	m, err := dataToMap(data)
-	if err != nil {
-		return "", err
-	}
-
-	return deriver.DeriveNamespace(m)
+type Schema struct {
+	name       string
+	raw        any
+	jsonSchema *jsonschema.Schema
 }
 
-func DeriveProperties(deriver DataDeriver, namespace Namespace, data any) (map[string]any, error) {
-	m, err := dataToMap(data)
-	if err != nil {
+func NewSchema(name string, raw []byte) (*Schema, error) {
+	schema := &Schema{name: name}
+
+	if err := json.Unmarshal(raw, &schema.raw); err != nil {
 		return nil, err
 	}
 
-	return deriver.DeriveProperties(namespace, m)
+	jsonSchema, err := jsonschema.CompileString(name, string(raw))
+	if err != nil {
+		return nil, err
+	}
+	schema.jsonSchema = jsonSchema
+
+	return schema, nil
 }
 
-func dataToMap(data any) (map[string]any, error) {
-	val := reflect.ValueOf(data)
+func (s Schema) Name() string {
+	return s.name
+}
 
-	// We can never derive anything from a slice, only from maps or structures
-	if val.Kind() == reflect.Slice {
-		return nil, ErrNonDerivable
-	}
+func (s Schema) Validate(data any) error {
+	return s.jsonSchema.Validate(data)
+}
 
-	// If data is already a map we just convert it to map[string]any
-	if val.Kind() == reflect.Map {
-		m := make(map[string]any, val.Len())
-		for _, k := range val.MapKeys() {
-			if k.Kind() == reflect.String {
-				m[k.String()] = val.MapIndex(k).Interface()
-			}
-		}
-		return m, nil
-	}
-
-	if val.Kind() != reflect.Struct {
-		return nil, ErrNonDerivable
-	}
-
-	// Here we have a structure, we rely on json package to convert it into
-	// a map for us.
-	rawData, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-
-	var m map[string]any
-
-	if err := json.Unmarshal(rawData, &m); err != nil {
-		return nil, err
-	}
-
-	return m, nil
+func (s Schema) Raw() any {
+	return s.raw
 }

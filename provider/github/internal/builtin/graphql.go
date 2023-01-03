@@ -4,21 +4,21 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/reposaur/reposaur/provider/github/client"
 	"net/http"
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/open-policy-agent/opa/ast"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
-	"github.com/reposaur/reposaur/provider/github/client"
 )
 
 type GraphQL struct {
 	Client *client.Client
 }
 
-func (gql GraphQL) Func() *rego.Function {
-	return &rego.Function{
+func (gql GraphQL) Func() *ast.Builtin {
+	return &ast.Builtin{
 		Name: "github.graphql",
 		Decl: types.NewFunction(
 			types.Args(
@@ -27,7 +27,6 @@ func (gql GraphQL) Func() *rego.Function {
 			),
 			types.A,
 		),
-		Memoize: true,
 	}
 }
 

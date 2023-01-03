@@ -1,14 +1,11 @@
-# Used for local tests only
-/config.yaml
-/policy/
-/testdata/events/_*.json
-dist/
-bin/
-
 # Generated
+/bin
 /completions
 
 # Editors
 /.idea
 /.vscode
 /.fleet
+
+# Obsidian
+/docs/.obsidian/workspace.json

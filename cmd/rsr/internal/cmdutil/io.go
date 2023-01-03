@@ -2,10 +2,9 @@ package cmdutil
 
 import (
 	"context"
+	"golang.org/x/exp/slog"
 	"io"
 	"os"
-
-	"github.com/rs/zerolog"
 )
 
 // GetInputReader returns an io.ReadCloser. If filename
@@ -13,15 +12,14 @@ import (
 // returns a reader from standard input.
 func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err error) {
 	var (
-		logger = zerolog.Ctx(ctx)
+		logger = slog.FromContext(ctx)
 		file   = os.Stdin
 	)
 
 	if filename == "" || filename == "-" {
-		logger.Debug().Msg("using standard input as INPUT")
+		logger.Debug("using standard input as INPUT")
 	} else {
-		logger.Debug().Msgf("using %s as INPUT", filename)
-
+		logger.Debug("using INPUT from file", "filename", filename)
 		file, err = os.Open(filename)
 		if err != nil {
 			return nil, err
@@ -36,15 +34,14 @@ func GetInputReader(ctx context.Context, filename string) (r io.ReadCloser, err 
 // returns a writer to standard output.
 func GetOutputWriter(ctx context.Context, filename string) (w io.WriteCloser, err error) {
 	var (
-		logger = zerolog.Ctx(ctx)
+		logger = slog.FromContext(ctx)
 		file   = os.Stdout
 	)
 
 	if filename == "" || filename == "-" {
-		logger.Debug().Msg("using standard output as OUTPUT")
+		logger.Debug("using standard output as OUTPUT")
 	} else {
-		logger.Debug().Msgf("using %s as OUTPUT", filename)
-
+		logger.Debug("using file as OUTPUT", "filename", filename)
 		file, err = os.OpenFile(filename, os.O_WRONLY+os.O_CREATE+os.O_TRUNC, 0o666)
 		if err != nil {
 			return nil, err
