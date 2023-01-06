@@ -1,6 +1,7 @@
 package reposaur
 
 import (
+	"fmt"
 	"github.com/go-git/go-billy/v5"
 	"io/fs"
 )
@@ -30,10 +31,12 @@ func (bfs billyFS) ReadDir(path string) ([]fs.DirEntry, error) {
 		return nil, err
 	}
 
-	dirEntries := make([]fs.DirEntry, len(files)-1)
-	for _, f := range files {
-		dirEntries = append(dirEntries, billyDirEntry{FileInfo: f})
+	dirEntries := make([]fs.DirEntry, len(files))
+	for i, f := range files {
+		dirEntries[i] = billyDirEntry{FileInfo: f}
 	}
+
+	fmt.Println(dirEntries)
 
 	return dirEntries, nil
 }
