@@ -4,7 +4,9 @@ go 1.18
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
+	github.com/docker/distribution v2.8.1+incompatible
 	github.com/go-git/go-billy/v5 v5.4.0
+	github.com/gofrs/uuid v4.3.1+incompatible
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/open-policy-agent/opa v0.47.4
 	github.com/owenrumney/go-sarif/v2 v2.1.2

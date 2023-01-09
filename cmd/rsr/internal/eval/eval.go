@@ -168,7 +168,7 @@ func processInputs(ctx context.Context, rsr *reposaur.Reposaur, inputsCh chan an
 	}
 }
 
-func outputReports(ctx context.Context, outWriter io.WriteCloser, reportsCh chan *reposaur.Report, reportsWg *sync.WaitGroup) {
+func outputReports(ctx context.Context, outWriter io.Writer, reportsCh chan *reposaur.Report, reportsWg *sync.WaitGroup) {
 	logger := slog.FromContext(ctx)
 	enc := json.NewEncoder(outWriter)
 	enc.SetIndent("", "  ")
@@ -187,7 +187,7 @@ func outputReports(ctx context.Context, outWriter io.WriteCloser, reportsCh chan
 	}
 }
 
-func readInput(ctx context.Context, inReader io.ReadCloser, inputsCh chan any, inputsWg *sync.WaitGroup) error {
+func readInput(ctx context.Context, inReader io.Reader, inputsCh chan any, inputsWg *sync.WaitGroup) error {
 	logger := slog.FromContext(ctx)
 
 	for {
