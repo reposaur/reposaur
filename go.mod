@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/hashicorp/go-retryablehttp v0.7.2
-	github.com/open-policy-agent/opa v0.46.1
+	github.com/open-policy-agent/opa v0.48.0
 	github.com/owenrumney/go-sarif/v2 v2.1.2
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
@@ -32,9 +32,9 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
+	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
