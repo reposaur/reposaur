@@ -77,7 +77,7 @@ $ curl -sfL https://get.reposaur.com | bash
 | Platform               | Status      | Details                                                                                   |
 |------------------------|-------------|-------------------------------------------------------------------------------------------|
 | [GitHub][github]       | In progress | [Provider][github-provider] • [GitHub App][github-app] • [GitHub Actions][github-actions] |
-| [GitLab][gitlab]       | Planned     | N/A                                                                                       |
+| [GitLab][gitlab]       | In progress | [Provider][gitlab-provider]                                                               |
 | [Gitea][gitea]         | Planned     | N/A                                                                                       |
 | [BitBucket][bitbucket] | Not planned | N/A                                                                                       |
 
@@ -122,6 +122,7 @@ This project is released under the [MIT License](LICENSE).
 [github-actions]: https://docs.reposaur.com/integrations/github-actions/setup-reposaur
 [github-provider]: https://docs.reposaur.com/
 [gitlab]: https://gitlab.com
+[gitlab-provider]: https://docs.reposaur.com/
 [gitea]: https://gitea.io
 [bitbucket]: https://bitbucket.org
 [releases]: https://github.com/reposaur/reposaur/releases/latest

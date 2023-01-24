@@ -14,6 +14,7 @@ import (
 	"github.com/reposaur/reposaur/pkg/sdk"
 	"github.com/reposaur/reposaur/provider/github"
 	githubclient "github.com/reposaur/reposaur/provider/github/client"
+	"github.com/reposaur/reposaur/provider/gitlab"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,7 @@ type execParams struct {
 	inputFilename  string
 	enableTracing  bool
 	github         cmdutil.GitHubClientOptions
+	gitlab         cmdutil.GitLabClientOptions
 }
 
 func NewCmd() *cobra.Command {
@@ -41,7 +43,10 @@ func NewCmd() *cobra.Command {
 	cmdutil.AddOutputFlag(flags, &params.outputFilename)
 	cmdutil.AddPolicyPathsFlag(flags, &params.policyPaths)
 	cmdutil.AddTraceFlag(flags, &params.enableTracing)
+
+	// Providers Flags
 	cmdutil.AddGitHubFlags(flags, &params.github)
+	cmdutil.AddGitLabFlags(flags, &params.gitlab)
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		var (
@@ -82,9 +87,15 @@ func NewCmd() *cobra.Command {
 			logger.Fatal().Err(err).Msg("failed to create GitHub provider")
 		}
 
+		gitlabProvider, err := newGitLabProvider(ctx, &params.gitlab)
+		if err != nil {
+			logger.Fatal().Err(err).Msg("failed to create GitLab provider")
+		}
+
 		opts := []sdk.Option{
 			sdk.WithLogger(*logger),
 			sdk.WithProvider(githubProvider),
+			sdk.WithProvider(gitlabProvider),
 			sdk.WithTracingEnabled(params.enableTracing),
 		}
 
@@ -212,4 +223,8 @@ func newGitHubProvider(ctx context.Context, opts *cmdutil.GitHubClientOptions) (
 	}
 
 	return github.NewProvider(client), nil
+}
+
+func newGitLabProvider(ctx context.Context, opts *cmdutil.GitLabClientOptions) (*gitlab.GitLab, error) {
+	return gitlab.NewProvider(), nil
 }
