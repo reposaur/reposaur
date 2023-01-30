@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.2
 	github.com/open-policy-agent/opa v0.48.0
 	github.com/owenrumney/go-sarif/v2 v2.1.2
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
