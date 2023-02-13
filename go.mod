@@ -5,12 +5,12 @@ go 1.18
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.1.0
 	github.com/hashicorp/go-retryablehttp v0.7.2
-	github.com/open-policy-agent/opa v0.48.0
+	github.com/open-policy-agent/opa v0.49.0
 	github.com/owenrumney/go-sarif/v2 v2.1.2
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
+	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 )
 
 require (
@@ -20,13 +20,13 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-github/v45 v45.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
