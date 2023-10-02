@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.2
 	github.com/open-policy-agent/opa v0.48.0
 	github.com/owenrumney/go-sarif/v2 v2.1.2
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
@@ -24,8 +24,8 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
@@ -34,7 +34,7 @@ require (
 	github.com/yashtewari/glob-intersection v0.1.0 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
