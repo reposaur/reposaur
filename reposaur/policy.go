@@ -2,8 +2,13 @@ package reposaur
 
 import (
 	"errors"
+	"github.com/gofrs/uuid"
 	"github.com/open-policy-agent/opa/ast"
 	"strings"
+)
+
+var uuidNamespace = uuid.Must(
+	uuid.FromString("b375ad63-ee21-432e-b916-883168b2f984"),
 )
 
 var ruleKinds = []*RuleKind{
@@ -29,6 +34,7 @@ var errSkipRule = errors.New("skip rule")
 type Policy struct {
 	Metadata
 
+	ID      string  `json:"id"`
 	Package string  `json:"package"`
 	Rules   []*Rule `json:"rules"`
 }
@@ -36,20 +42,22 @@ type Policy struct {
 type Rule struct {
 	Metadata
 
-	ID   string
-	Kind *RuleKind
+	ID   string    `json:"id"`
+	Name string    `json:"name"`
+	Kind *RuleKind `json:"-"`
 
-	name   string
 	schema ast.Ref
 }
 
 func newRule(r *ast.Rule) (rule *Rule, err error) {
 	rule = &Rule{}
 
-	rule.ID, rule.Kind, err = parseRuleName(r)
+	rule.Name, rule.Kind, err = parseRuleName(r)
 	if err != nil {
 		return nil, err
 	}
+
+	rule.ID = genID(rule.Name)
 
 	for _, a := range r.Module.Annotations {
 		if a.Scope == "rule" && a.GetTargetPath().String() == r.Ref().String() {
@@ -198,4 +206,8 @@ func contains(slice []string, target string) bool {
 
 func parsePackageName(mod *ast.Module) string {
 	return strings.TrimPrefix(mod.Package.Path.String(), "data.")
+}
+
+func genID(name string) string {
+	return uuid.NewV5(uuidNamespace, name).String()
 }

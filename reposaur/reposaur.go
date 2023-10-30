@@ -105,7 +105,7 @@ func (r *Reposaur) LoadPolicies(paths ...string) error {
 
 		policy, ok := r.policies[pkgName]
 		if !ok {
-			policy = &Policy{Package: pkgName}
+			policy = &Policy{ID: genID(pkgName), Package: pkgName}
 			for _, a := range mod.Annotations {
 				if a.Scope == "package" {
 					policy.Metadata = newMetadata(a)
@@ -155,7 +155,7 @@ func (r *Reposaur) Eval(ctx context.Context, input any) (*Report, error) {
 			reportRule := &reportRule{policy: policy, rule: rule}
 
 			// check if rule should be skipped
-			skipQuery := fmt.Sprintf("data.%s.skip[_][_] == %q", policy.Package, rule.ID)
+			skipQuery := fmt.Sprintf("data.%s.skip[_][_] == %q", policy.Package, rule.Name)
 			rs, err := r.doEval(ctx, skipQuery, input)
 			if err != nil {
 				return nil, err
@@ -167,7 +167,7 @@ func (r *Reposaur) Eval(ctx context.Context, input any) (*Report, error) {
 				continue
 			}
 
-			query := fmt.Sprintf("data.%s.%s", policy.Package, rule.ID)
+			query := fmt.Sprintf("data.%s.%s", policy.Package, rule.Name)
 			rs, err = r.doEval(ctx, query, input)
 			if err != nil {
 				return nil, err

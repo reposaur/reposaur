@@ -29,13 +29,12 @@ func (r Report) SARIF() (*sarif.Report, error) {
 
 	for _, rule := range r.rules {
 		props := sarif.Properties{
+			"name":              rule.rule.Name,
 			"tags":              rule.rule.Tags,
 			"security-severity": fmt.Sprintf("%0.2f", rule.rule.SecuritySeverity),
 		}
 
-		uid := fmt.Sprintf("%s/%s/%s", rule.policy.Package, rule.rule.Kind.Name, rule.rule.ID)
-
-		run.AddRule(uid).
+		run.AddRule(rule.rule.ID).
 			WithName(rule.rule.Title).
 			WithDescription(rule.rule.Title).
 			WithFullDescription(
@@ -47,7 +46,7 @@ func (r Report) SARIF() (*sarif.Report, error) {
 
 		if !rule.passed && !rule.skipped {
 			run.AddResult(
-				sarif.NewRuleResult(uid).
+				sarif.NewRuleResult(rule.rule.ID).
 					WithLevel(rule.rule.Kind.Name).
 					WithMessage(sarif.NewTextMessage(rule.rule.Title)).
 					WithLocations([]*sarif.Location{
